@@ -4,15 +4,10 @@ from typing import List, Dict, Set
 from urllib.parse import urlparse
 
 from scraper import crawl_portfolio_page
-from llm_extractor import (
-    extract_company_seeds,
-    select_company_docs,
-    fuse_deep_profile,
-)
-from deep_crawler import crawl_domain
+from llm_extractor import extract_company_seeds
 from google_company_search import find_official_company_website
 from db import insert_portfolio_row
-from schema import CompanySeed, PortfolioCsvRow
+from schema import CompanySeed
 
 
 # ==================================================
@@ -135,12 +130,7 @@ def process_portfolio_url(
             return False
 
         # --------------------------------------------------
-        # 5️⃣ Deep crawl once
-        # --------------------------------------------------
-        docs_by_url = crawl_domain(source_url)
-
-        # --------------------------------------------------
-        # 6️⃣ Process companies
+        # 5️⃣ Process companies
         # --------------------------------------------------
         for seed in seeds:
             seed.investor_name = investor_name
@@ -164,7 +154,7 @@ def process_portfolio_url(
                     )
 
             # --------------------------------------------------
-            # 7️⃣ KEYWORD MATCH (FIXED)
+            # 6️⃣ KEYWORD MATCH
             # --------------------------------------------------
             seed.keywords = _match_keywords_for_seed(
                 seed,
@@ -174,16 +164,13 @@ def process_portfolio_url(
             )
 
             # --------------------------------------------------
-            # 8️⃣ Deep fusion
+            # 7️⃣ Build final record (no fusion needed - Google verified)
             # --------------------------------------------------
-            docs = select_company_docs(seed, docs_by_url)
-            fused: PortfolioCsvRow = fuse_deep_profile(seed, docs)
-
             record = {
                 "source_url": source_url,
                 "investor_name": investor_name,
-                "company_name": fused.company_name,
-                "company_website": fused.company_website,
+                "company_name": seed.company_name,
+                "company_website": seed.company_website,
                 "keywords": seed.keywords,
             }
 

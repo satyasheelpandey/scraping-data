@@ -22,7 +22,7 @@ if not OPENAI_API_KEY:
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 MODEL_FAST = "gpt-4o-mini"
-MODEL_DEEP = "gpt-4o"
+MODEL_DEEP = "gpt-4o-mini"  # Changed from gpt-4o (not accessible)
 
 
 
