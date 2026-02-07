@@ -1,28 +1,21 @@
 """
-Enhanced Deal Article Finder
+Deal Article Finder
 
-Discovers deal/investment announcement articles using Google Search
-with intelligent URL ranking based on domain quality and content signals.
-
-Ranking logic adapted from news_deals_pipeline article_expander.py
+Discovers deal/investment articles via Google Custom Search
+and ranks URLs by domain quality and M&A content signals.
 """
 import os
 import logging
-import time
 import re
 from typing import List, Dict, Optional
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 import requests
-
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-
-# ==================================================
-# ENVIRONMENT
-# ==================================================
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_DEAL_API_KEY")
 GOOGLE_CX = os.getenv("GOOGLE_DEAL_CX")
@@ -30,313 +23,176 @@ GOOGLE_CX = os.getenv("GOOGLE_DEAL_CX")
 if not GOOGLE_API_KEY or not GOOGLE_CX:
     raise RuntimeError("GOOGLE_DEAL_API_KEY or GOOGLE_DEAL_CX missing in .env")
 
-REQUEST_DELAY = 1.0
+
+class RateLimitError(Exception):
+    """Raised when API returns HTTP 429."""
 
 
-# ==================================================
-# URL SCORING (from article_expander.py)
-# ==================================================
+# --- domain / path scoring constants ---
 
-# Domains known for M&A press releases and deal news
-HIGH_VALUE_DOMAINS = {
-    "prnewswire.com", "businesswire.com", "globenewswire.com",
-    "reuters.com", "bloomberg.com", "ft.com", "wsj.com",
-    "cnbc.com", "dealogic.com",
-    "pitchbook.com", "preqin.com", "privateequitywire.co.uk",
-    "pe-hub.com", "buyoutsinsider.com", "mergr.com",
+BLOCKED_DOMAINS = {
+    "pitchbook.com",
+    "prnewswire.com",
+    "prweb.com",
+    "preqin.com",
+    "find-and-update.company-information.service.gov.uk",
 }
 
-# Domains unlikely to contain deal-specific content
+HIGH_VALUE_DOMAINS = {
+    "businesswire.com", "globenewswire.com",
+    "reuters.com", "bloomberg.com", "ft.com", "wsj.com",
+    "cnbc.com", "dealogic.com",
+    "privateequitywire.co.uk",
+    "pe-hub.com", "buyoutsinsider.com", "mergr.com",
+    "techcrunch.com", "finsmes.com", "thesaasnews.com",
+}
+
 LOW_VALUE_DOMAINS = {
     "linkedin.com", "facebook.com", "twitter.com", "x.com",
     "instagram.com", "youtube.com", "reddit.com",
     "wikipedia.org", "google.com", "bing.com",
 }
 
-# Path keywords that signal M&A deal content
-DEAL_KEYWORDS = [
+DEAL_PATH_KEYWORDS = [
     "acqui", "merger", "deal", "takeover", "buyout", "divest",
     "acquisition", "purchase", "transaction", "completes",
     "announces", "agreement", "press-release", "news-release",
     "press_release", "newsrelease",
+    "raises", "funding", "invest", "series-a", "series-b", "series-c",
+    "secures", "closes", "growth-capital", "round",
 ]
+
+NON_ARTICLE_SEGMENTS = ["/category/", "/tag/", "/search", "/pub/dir/", "/profile/"]
+NEWS_SEGMENTS = ["/news/", "/press/", "/media/", "/article/", "/stories/"]
+NON_ARTICLE_EXTENSIONS = (".pdf", ".jpg", ".png", ".gif", ".txt", ".csv", ".zip")
+
+
+def _is_blocked_domain(url: str) -> bool:
+    """Check if URL belongs to a blocked domain."""
+    try:
+        domain = urlparse(url.strip()).netloc.lower().removeprefix("www.")
+        return any(domain.endswith(d) for d in BLOCKED_DOMAINS)
+    except ValueError:
+        return False
 
 
 def score_url_for_deal_relevance(url: str) -> int:
-    """
-    Score a URL by likelihood of containing M&A deal information.
-
-    Higher score = more likely to have deal content.
-    Scoring factors: domain reputation, path keywords, path depth.
-
-    Scoring table:
-    ┌─────────────────────────┬───────┬──────────────────────────────────────────────┐
-    │         Factor          │ Score │                   Examples                   │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Baseline                │ 50    │ All URLs start here                          │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ High-value domain       │ +30   │ reuters.com, bloomberg.com, businesswire.com │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Low-value domain        │ -40   │ linkedin.com, wikipedia.org, youtube.com     │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Deal keyword in path    │ +20   │ /acquisition/, /merger/, /press-release/     │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ News-style path         │ +10   │ /news/, /press/, /article/                   │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Deep path (2+ segments) │ +5    │ /2024/company-acquires-target                │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Bare homepage           │ -30   │ /, /index.html                               │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Non-article path        │ -20   │ /category/, /search, /profile/               │
-    ├─────────────────────────┼───────┼──────────────────────────────────────────────┤
-    │ Non-article extension   │ -15   │ .pdf, .jpg, .csv                             │
-    └─────────────────────────┴───────┴──────────────────────────────────────────────┘
-
-    Args:
-        url: The URL to score
-
-    Returns:
-        Integer score (higher = better)
-    """
-    score = 50  # baseline
+    """Score URL by likelihood of containing M&A deal info (higher = better)."""
+    score = 50
 
     try:
         parsed = urlparse(url.strip())
         domain = parsed.netloc.lower().removeprefix("www.")
         path = parsed.path.lower()
-    except Exception:
+    except ValueError:
         return score
 
-    # Domain scoring
-    for hv in HIGH_VALUE_DOMAINS:
-        if domain.endswith(hv):
-            score += 30
-            break
-
-    for lv in LOW_VALUE_DOMAINS:
-        if domain.endswith(lv):
-            score -= 40
-            break
-
-    # Path keyword scoring
-    for kw in DEAL_KEYWORDS:
-        if kw in path:
-            score += 20
-            break
-
-    # Penalize bare homepages (just "/" or empty path)
+    if any(domain.endswith(d) for d in HIGH_VALUE_DOMAINS):
+        score += 30
+    if any(domain.endswith(d) for d in LOW_VALUE_DOMAINS):
+        score -= 40
+    if any(kw in path for kw in DEAL_PATH_KEYWORDS):
+        score += 20
     if path in ("", "/", "/index.html", "/index.htm"):
         score -= 30
-
-    # Penalize non-article paths (category pages, search, profiles)
-    if any(seg in path for seg in ["/category/", "/tag/", "/search", "/pub/dir/", "/profile/"]):
+    if any(seg in path for seg in NON_ARTICLE_SEGMENTS):
         score -= 20
-
-    # Boost paths that look like specific articles (have slugs or IDs)
-    segments = [s for s in path.split("/") if s]
-    if len(segments) >= 2:
-        score += 5  # deeper paths tend to be specific articles
-
-    # Penalize file extensions that aren't articles
-    if path.endswith((".pdf", ".jpg", ".png", ".gif", ".txt", ".csv", ".zip")):
+    if len([s for s in path.split("/") if s]) >= 2:
+        score += 5
+    if path.endswith(NON_ARTICLE_EXTENSIONS):
         score -= 15
-
-    # Boost news-style paths
-    if any(seg in path for seg in ["/news/", "/press/", "/media/", "/article/", "/stories/"]):
+    if any(seg in path for seg in NEWS_SEGMENTS):
         score += 10
 
     return score
 
 
-# ==================================================
-# GOOGLE SEARCH
-# ==================================================
-
-def search_google_for_articles(company_name: str, investor_name: str) -> List[str]:
-    """
-    Search Google for deal articles about company and investor.
-
-    Args:
-        company_name: Name of the company
-        investor_name: Name of the investor
-
-    Returns:
-        List of URLs (up to 10)
-    """
-    # Build query
-    query_parts = []
-    if company_name:
-        query_parts.append(company_name)
-    if investor_name:
-        query_parts.append(investor_name)
-
-    if not query_parts:
+@retry(
+    retry=retry_if_exception_type((RateLimitError, requests.ConnectionError, requests.Timeout)),
+    wait=wait_exponential(multiplier=1, min=2, max=60),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _search_google(company_name: str, investor_name: str) -> List[str]:
+    """Search Google Custom Search for deal articles. Returns up to 10 URLs."""
+    query = " ".join(filter(None, [company_name, investor_name]))
+    if not query:
         return []
-
-    query = " ".join(query_parts)
-
-    url = "https://www.googleapis.com/customsearch/v1"
-    params = {
-        'key': GOOGLE_API_KEY,
-        'cx': GOOGLE_CX,
-        'q': query,
-        'num': 10  # Request 10 results
-    }
 
     try:
-        logger.info(f"🔍 Google Search: {query}")
-        resp = requests.get(url, params=params, timeout=20)
-
+        resp = requests.get(
+            "https://www.googleapis.com/customsearch/v1",
+            params={"key": GOOGLE_API_KEY, "cx": GOOGLE_CX, "q": query, "num": 10},
+            timeout=20,
+        )
+        if resp.status_code == 429:
+            raise RateLimitError("Google API rate limited (429)")
         if resp.status_code != 200:
-            logger.error(f"Google API error {resp.status_code}: {resp.text}")
+            logger.error("Google API error %d", resp.status_code)
             return []
 
-        data = resp.json()
-        items = data.get("items", [])
+        items = resp.json().get("items", [])
+        return [item["link"] for item in items if item.get("link")]
 
-        if not items:
-            logger.warning(f"No Google results for: {query}")
-            return []
+    except (requests.ConnectionError, requests.Timeout) as e:
+        logger.warning("Google Search network error: %s", e)
+        raise
 
-        urls = []
-        for item in items:
-            link = item.get("link")
-            if link:
-                urls.append(link)
-
-        logger.info(f"✅ Found {len(urls)} Google results")
-        time.sleep(REQUEST_DELAY)
-        return urls
-
-    except Exception as e:
-        logger.error(f"Google Search error: {e}")
-        return []
-
-
-# ==================================================
-# COMPANY WEBSITE DISCOVERY
-# ==================================================
 
 def _identify_company_website(urls: List[str], company_name: str) -> Optional[str]:
-    """
-    Identify the official company website from URL list.
-
-    Looks for URLs where the domain closely matches the company name.
-
-    Args:
-        urls: List of URLs from Google search
-        company_name: Name of the company
-
-    Returns:
-        Company website URL or None
-    """
+    """Find the official company website from a URL list by domain matching."""
     if not company_name:
         return None
 
-    # Clean company name for matching
     clean_name = re.sub(r'[^\w\s-]', '', company_name.lower())
     clean_name = re.sub(r'\s+', '', clean_name)
-
-    # Remove common suffixes
-    for suffix in ['inc', 'corp', 'corporation', 'llc', 'ltd', 'limited', 'group', 'holdings']:
-        clean_name = clean_name.replace(suffix, '')
+    for suffix in ["inc", "corp", "corporation", "llc", "ltd", "limited", "group", "holdings"]:
+        clean_name = clean_name.replace(suffix, "")
 
     for url in urls:
         try:
             domain = urlparse(url).netloc.lower().removeprefix("www.")
-
-            # Check if company name is in domain
-            if clean_name in domain.replace('.', '').replace('-', ''):
-                # Avoid low-value domains even if they match
-                is_low_value = any(lv in domain for lv in LOW_VALUE_DOMAINS)
-                if not is_low_value:
-                    logger.info(f"✅ Identified company website: {url}")
+            if clean_name in domain.replace(".", "").replace("-", ""):
+                if not any(lv in domain for lv in LOW_VALUE_DOMAINS):
                     return url
-
-        except Exception:
+        except ValueError:
             continue
 
     return None
 
 
-# ==================================================
-# MAIN API
-# ==================================================
-
 def find_deal_articles(company_name: str, investor_name: str) -> Dict:
     """
     Find top 3 deal articles for a company-investor pair.
 
-    Args:
-        company_name: Name of the company
-        investor_name: Name of the investor/acquirer
-
-    Returns:
-        Dictionary with:
-        {
-            "company_name": str,
-            "investor_name": str,
-            "company_website": str or None,
-            "articles": [
-                {"url": str, "score": int},
-                {"url": str, "score": int},
-                {"url": str, "score": int}
-            ]
-        }
+    Returns: {"articles": [{"url": str, "score": int}, ...]}
     """
-    result = {
-        "company_name": company_name,
-        "investor_name": investor_name,
-        "company_website": None,
-        "articles": []
-    }
-
-    # Validate inputs
     if not company_name and not investor_name:
-        return result
+        return {"articles": []}
 
-    # Search Google
-    urls = search_google_for_articles(company_name, investor_name)
-
+    urls = _search_google(company_name, investor_name)
     if not urls:
-        return result
+        return {"articles": []}
 
-    # Identify company website
+    # Remove company website and blocked domains from article candidates
     company_website = _identify_company_website(urls, company_name)
-    result["company_website"] = company_website
+    article_urls = [
+        u for u in urls
+        if u != company_website and not _is_blocked_domain(u)
+    ]
 
-    # Remove company website from article candidates
-    article_urls = [u for u in urls if u != company_website]
-
-    # Score all URLs
-    scored_urls = []
-    seen_urls = set()
-
+    # Score, deduplicate, sort
+    seen: set[str] = set()
+    scored = []
     for url in article_urls:
-        # Deduplicate
-        if url in seen_urls:
+        if url in seen:
             continue
-        seen_urls.add(url)
+        seen.add(url)
+        scored.append({"url": url, "score": score_url_for_deal_relevance(url)})
 
-        score = score_url_for_deal_relevance(url)
-        scored_urls.append({
-            "url": url,
-            "score": score
-        })
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    return {"articles": scored[:3]}
 
-    # Sort by score (descending)
-    scored_urls.sort(key=lambda x: x["score"], reverse=True)
-
-    # Return top 3
-    result["articles"] = scored_urls[:3]
-
-    logger.info(f"📊 Ranked {len(scored_urls)} articles, returning top 3")
-    return result
-
-
-# ==================================================
-# CLI TEST
-# ==================================================
 
 if __name__ == "__main__":
     import sys
@@ -345,14 +201,6 @@ if __name__ == "__main__":
         print("Usage: python deal_article_finder.py <company_name> <investor_name>")
         sys.exit(1)
 
-    company = sys.argv[1]
-    investor = sys.argv[2]
-
-    result = find_deal_articles(company, investor)
-
-    print(f"\n🏢 Company: {result['company_name']}")
-    print(f"💼 Investor: {result['investor_name']}")
-    print(f"🌐 Website: {result['company_website']}")
-    print(f"\n📰 Top 3 Articles:")
-    for i, article in enumerate(result['articles'], 1):
+    result = find_deal_articles(sys.argv[1], sys.argv[2])
+    for i, article in enumerate(result["articles"], 1):
         print(f"{i}. [{article['score']:3d}] {article['url']}")
