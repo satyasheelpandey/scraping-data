@@ -75,7 +75,6 @@ def extract_company_seeds(
     investor_name: str,
     page_text: str,
     anchors: List[Dict],
-    ocr_results: List[Dict],
     blocks: List[str],
     dom_chunks: List[str],
     embedded_json: List[Dict[str, Any]],
@@ -110,9 +109,6 @@ def extract_company_seeds(
 
         # tables / grids
         "dom_chunks": dom_chunks[:80],
-
-        # OCR logos
-        "ocr_results": ocr_results[:40],
     }
 
     system_prompt = (
@@ -125,8 +121,7 @@ def extract_company_seeds(
         "- Companies may appear as cards, tiles, grids, tables, or repeated links\n"
         "- Many companies are represented only by anchor links\n"
         "- Anchor text OR anchor hint may represent the company name\n"
-        "- Repeated anchor patterns usually indicate portfolio companies\n"
-        "- Logos may represent companies even without text\n\n"
+        "- Repeated anchor patterns usually indicate portfolio companies\n\n"
 
         "STRICT RULES:\n"
         "- Do NOT invent companies\n"

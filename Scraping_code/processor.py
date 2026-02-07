@@ -4,7 +4,6 @@ from typing import List, Dict, Set
 from urllib.parse import urlparse
 
 from scraper import crawl_portfolio_page
-from ocr import run_logo_ocr
 from llm_extractor import (
     extract_company_seeds,
     select_company_docs,
@@ -119,23 +118,13 @@ def process_portfolio_url(
         print(f"🔗 Active keywords: {sorted(active_keywords)}")
 
         # --------------------------------------------------
-        # 3️⃣ OCR
-        # --------------------------------------------------
-        ocr_results = []
-        for img in logo_urls:
-            text, conf = run_logo_ocr(img)
-            if text:
-                ocr_results.append({"text": text, "confidence": conf})
-
-        # --------------------------------------------------
-        # 4️⃣ LLM SEED EXTRACTION
+        # 3️⃣ LLM SEED EXTRACTION
         # --------------------------------------------------
         seeds = extract_company_seeds(
             source_url=source_url,
             investor_name=investor_name,
             page_text=page_text,
             anchors=anchors,
-            ocr_results=ocr_results,
             blocks=blocks,
             dom_chunks=dom_chunks,
             embedded_json=embedded_json,
