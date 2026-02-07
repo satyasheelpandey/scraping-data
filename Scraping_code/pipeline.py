@@ -5,8 +5,8 @@ import os
 from processor import process_portfolio_url
 from utils.investor import extract_investor_name
 
-# Google deal finder
-from deal_link_finder import find_ranked_deal_links
+# Enhanced Google deal finder with URL ranking
+from deal_article_finder import find_deal_articles
 
 
 INPUT_FILE = "input_urls.csv"
@@ -142,18 +142,18 @@ def run_pipeline():
             # ----------------------------------
             if company and investor:
                 try:
-                    results = find_ranked_deal_links(
-                        target=company,
-                        acquirer=investor,
-                        top_k=3,
+                    result = find_deal_articles(
+                        company_name=company,
+                        investor_name=investor,
                     )
 
-                    for r in results:
+                    # Write top 3 articles
+                    for article in result.get("articles", []):
                         writer.writerow({
                             "company_name": company,
                             "investor_name": investor,
-                            "deal_url": r["url"],
-                            "score": r["score"],
+                            "deal_url": article["url"],
+                            "score": article["score"],
                         })
 
                 except Exception as e:
@@ -168,18 +168,18 @@ def run_pipeline():
                 print(f"🔁 No companies found — investor-level deal search for {investor}")
 
                 try:
-                    results = find_ranked_deal_links(
-                        target=investor,
-                        acquirer=investor,
-                        top_k=5,
+                    result = find_deal_articles(
+                        company_name=investor,
+                        investor_name=investor,
                     )
 
-                    for r in results:
+                    # Write top 3 articles (investor-level search)
+                    for article in result.get("articles", []):
                         writer.writerow({
                             "company_name": "",
                             "investor_name": investor,
-                            "deal_url": r["url"],
-                            "score": r["score"],
+                            "deal_url": article["url"],
+                            "score": article["score"],
                         })
 
                 except Exception as e:
