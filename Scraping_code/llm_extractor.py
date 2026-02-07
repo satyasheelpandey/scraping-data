@@ -1,18 +1,16 @@
 # llm_extractor.py
+import logging
 import os
 import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, RateLimitError, APIConnectionError, APITimeoutError
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from schema import PortfolioCsvRow, CompanySeed, PageDoc
-from utils.url_normalizer import normalize_url
+from schema import CompanySeed
 from utils.json_repair import repair_json
 
-
-# --------------------------------------------------
-# ENV
-# --------------------------------------------------
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -21,73 +19,89 @@ if not OPENAI_API_KEY:
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-MODEL_FAST = "gpt-4o-mini"
-MODEL_DEEP = "gpt-4o"
+MODEL = "gpt-4o-mini"
+
+NAME_FIELDS = {"name", "companyName", "company_name", "title", "companyname"}
+SKIP_FIELDS = {"_createdAt", "_updatedAt", "_rev", "_id", "_key", "_system", "_type"}
 
 
-
-
-def normalize_website_strict(url: str) -> str:
-    """
-    Guarantees https:// format for domains.
-    """
+def _normalize_website(url: str) -> str:
+    """Ensure https:// prefix on URLs."""
     if not url:
         return ""
-
     url = url.strip()
-
-    # already has scheme
     if url.startswith("http://") or url.startswith("https://"):
         return url.replace("http://", "https://")
-
-    # domain only
     return "https://" + url
 
-
-# --------------------------------------------------
-# JSON CLEANERS (UNCHANGED)
-# --------------------------------------------------
 
 def _clean_json_array(text: str) -> List[Dict]:
     fixed = repair_json(text)
     try:
         data = json.loads(fixed)
         return data if isinstance(data, list) else []
-    except Exception:
+    except (json.JSONDecodeError, ValueError):
         return []
 
 
-def _clean_json_object(text: str) -> Dict:
-    fixed = repair_json(text)
-    try:
-        data = json.loads(fixed)
-        return data if isinstance(data, dict) else {}
-    except Exception:
-        return {}
+def _extract_records_from_json(data: Any, depth: int = 0) -> List[str]:
+    """Recursively find company-like records in nested JSON and return as text blocks."""
+    records: List[str] = []
+    if depth > 8:
+        return records
+
+    if isinstance(data, dict):
+        for v in data.values():
+            records.extend(_extract_records_from_json(v, depth + 1))
+    elif isinstance(data, list) and data and isinstance(data[0], dict):
+        has_name = any(k in data[0] for k in NAME_FIELDS)
+        if has_name:
+            for item in data:
+                parts = []
+                for k, v in item.items():
+                    if k in SKIP_FIELDS:
+                        continue
+                    if isinstance(v, str) and v.strip():
+                        parts.append(f"{k}: {v}")
+                if parts:
+                    records.append(" | ".join(parts))
+        else:
+            for item in data:
+                if isinstance(item, dict):
+                    records.extend(_extract_records_from_json(item, depth + 1))
+
+    return records
 
 
-# --------------------------------------------------
-# SEED EXTRACTION (HIGH RECALL, SAFE)
-# --------------------------------------------------
+@retry(
+    retry=retry_if_exception_type((RateLimitError, APIConnectionError, APITimeoutError)),
+    wait=wait_exponential(multiplier=2, min=4, max=120),
+    stop=stop_after_attempt(3),
+    before_sleep=lambda retry_state: logger.warning(
+        "OpenAI rate limited, retrying in %ds...", retry_state.next_action.sleep
+    ),
+)
+def _call_openai(system_prompt: str, user_content: str):
+    return client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ],
+        temperature=0.0,
+        max_tokens=8000,
+    )
+
 
 def extract_company_seeds(
     source_url: str,
     investor_name: str,
-    page_text: str,
     anchors: List[Dict],
-    ocr_results: List[Dict],
     blocks: List[str],
     dom_chunks: List[str],
     embedded_json: List[Dict[str, Any]],
 ) -> List[CompanySeed]:
-    """
-    Same function signature.
-    Higher recall using stronger LLM signals.
-    """
-
-    # -----------------------------
-    # Anchor hints (NO URL parsing logic)
-    # -----------------------------
+    """Extract company names and websites from crawled portfolio page data."""
     anchor_hints = []
     for a in anchors:
         text = (a.get("text") or "").strip()
@@ -98,22 +112,21 @@ def extract_company_seeds(
 
         anchor_hints.append({
             "text": text,
-            "hint": href.split("/")[-1] if "/" in href else ""
+            "hint": href.strip("/").split("/")[-1] if "/" in href else ""
         })
 
-    payload = {
-        # strongest signals first
+    # Extract structured records from embedded JSON (SPA data, script tags)
+    json_records: List[str] = []
+    for obj in embedded_json:
+        json_records.extend(_extract_records_from_json(obj))
+
+    payload: Dict[str, Any] = {
         "anchor_hints": anchor_hints[:300],
-
-        # visible content
         "blocks": blocks[:250],
-
-        # tables / grids
         "dom_chunks": dom_chunks[:80],
-
-        # OCR logos
-        "ocr_results": ocr_results[:40],
     }
+    if json_records:
+        payload["structured_data"] = json_records[:200]
 
     system_prompt = (
         "You are an expert portfolio page parser.\n\n"
@@ -126,7 +139,9 @@ def extract_company_seeds(
         "- Many companies are represented only by anchor links\n"
         "- Anchor text OR anchor hint may represent the company name\n"
         "- Repeated anchor patterns usually indicate portfolio companies\n"
-        "- Logos may represent companies even without text\n\n"
+        "- structured_data contains records extracted from the page's data layer "
+        "(look for name, companyName, or title fields for company names, "
+        "and website fields for URLs)\n\n"
 
         "STRICT RULES:\n"
         "- Do NOT invent companies\n"
@@ -144,15 +159,7 @@ def extract_company_seeds(
         "NO explanations. NO extra text."
     )
 
-    resp = client.chat.completions.create(
-        model=MODEL_FAST,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
-        ],
-        temperature=0.0,
-        max_tokens=3500,
-    )
+    resp = _call_openai(system_prompt, json.dumps(payload, ensure_ascii=False))
 
     raw = _clean_json_array(resp.choices[0].message.content or "[]")
 
@@ -162,7 +169,7 @@ def extract_company_seeds(
     for item in raw:
         name = (item.get("company_name") or "").strip()
         raw_site = (item.get("company_website") or "").strip()
-        site = normalize_website_strict(raw_site)
+        site = _normalize_website(raw_site)
 
         if not name:
             continue
@@ -182,81 +189,3 @@ def extract_company_seeds(
         )
 
     return seeds
-
-
-# --------------------------------------------------
-# DOC SELECTION (UNCHANGED)
-# --------------------------------------------------
-
-def select_company_docs(
-    seed: CompanySeed,
-    docs_by_url: Dict[str, PageDoc],
-    max_docs: int = 25,
-) -> List[Dict[str, Any]]:
-
-    name = seed.company_name.lower()
-    selected: List[PageDoc] = []
-
-    for doc in docs_by_url.values():
-        if name in doc.url.lower() or name in doc.text.lower():
-            selected.append(doc)
-        if len(selected) >= max_docs:
-            break
-
-    return [
-        {
-            "url": d.url,
-            "type": d.doc_type,
-            "text": d.text,
-            "embedded_json": d.embedded_json,
-        }
-        for d in selected
-    ]
-
-
-# --------------------------------------------------
-# DEEP FUSION (UNCHANGED)
-# --------------------------------------------------
-
-def fuse_deep_profile(
-    seed: CompanySeed,
-    documents: List[Dict[str, Any]],
-) -> PortfolioCsvRow:
-
-    system_prompt = (
-        "You normalize a company website.\n\n"
-        "RULES:\n"
-        "- Use ONLY provided documents\n"
-        "- Do NOT guess\n"
-        "- If multiple websites appear, pick the most official\n"
-        "- Otherwise return empty string\n\n"
-        "Return ONLY JSON:\n"
-        "{ \"company_website\": \"\" }"
-    )
-
-    resp = client.chat.completions.create(
-        model=MODEL_DEEP,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": json.dumps({
-                "seed": seed.model_dump(),
-                "documents": documents[:15],
-            }, ensure_ascii=False)},
-        ],
-        temperature=0.0,
-        max_tokens=1200,
-    )
-
-    data = _clean_json_object(resp.choices[0].message.content or "{}")
-
-    website = normalize_url(
-        seed.source_url,
-        data.get("company_website", "")
-    ) or seed.company_website
-
-    return PortfolioCsvRow(
-        source_url=seed.source_url,
-        investor_name=seed.investor_name,
-        company_name=seed.company_name,
-        company_website=website or "",
-    )
