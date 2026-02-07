@@ -32,8 +32,9 @@ def _try_knowledge_graph(company_name: str) -> Dict:
     params = {
         "key": GOOGLE_API_KEY,
         "query": company_name,
-        "limit": 3,
-        "types": ["Organization", "Corporation"],
+        "limit": 5,
+        # Note: removed 'types' parameter - API works better without it
+        # and automatically prioritizes Organization entities
     }
 
     try:
@@ -44,6 +45,7 @@ def _try_knowledge_graph(company_name: str) -> Dict:
         # Parse Knowledge Graph results
         for item in data.get("itemListElement", []):
             result = item.get("result", {})
+            entity_name = result.get("name", "").lower()
 
             # Get official URL from Knowledge Graph
             website = result.get("url", "")
@@ -54,18 +56,29 @@ def _try_knowledge_graph(company_name: str) -> Dict:
                 if any(k in domain for k in REJECT_KEYWORDS):
                     continue
 
-                # Knowledge Graph URLs are verified - return immediately
-                print(f"✓ Knowledge Graph verified: {website}")
-                return {
-                    "company_website": website,
-                    "title": result.get("name", ""),
-                    "snippet": result.get("description", ""),
-                    "source": "knowledge_graph"
-                }
+                # Validate: domain should contain company name or vice versa
+                # This catches cases like "Salesforce" -> "herontower.com" (wrong!)
+                company_clean = company_name.lower().replace(" ", "").replace("-", "")
+                domain_clean = domain.replace("www.", "").replace(".com", "").replace(".net", "").replace(".org", "")
+                entity_clean = entity_name.replace(" ", "").replace("-", "")
+
+                # Check if company name is in domain or entity name matches
+                if (company_clean in domain_clean or
+                    domain_clean in company_clean or
+                    company_clean == entity_clean):
+
+                    print(f"✓ Knowledge Graph verified: {website}")
+                    return {
+                        "company_website": website,
+                        "title": result.get("name", ""),
+                        "snippet": result.get("description", ""),
+                        "source": "knowledge_graph"
+                    }
 
         # Also check detailedDescription for website URLs
         for item in data.get("itemListElement", []):
             result = item.get("result", {})
+            entity_name = result.get("name", "").lower()
             detailed = result.get("detailedDescription", {})
             website = detailed.get("url", "")
 
@@ -74,13 +87,22 @@ def _try_knowledge_graph(company_name: str) -> Dict:
                 if any(k in domain for k in REJECT_KEYWORDS):
                     continue
 
-                print(f"✓ Knowledge Graph (detailed) verified: {website}")
-                return {
-                    "company_website": website,
-                    "title": result.get("name", ""),
-                    "snippet": result.get("description", ""),
-                    "source": "knowledge_graph"
-                }
+                # Same validation as above
+                company_clean = company_name.lower().replace(" ", "").replace("-", "")
+                domain_clean = domain.replace("www.", "").replace(".com", "").replace(".net", "").replace(".org", "")
+                entity_clean = entity_name.replace(" ", "").replace("-", "")
+
+                if (company_clean in domain_clean or
+                    domain_clean in company_clean or
+                    company_clean == entity_clean):
+
+                    print(f"✓ Knowledge Graph (detailed) verified: {website}")
+                    return {
+                        "company_website": website,
+                        "title": result.get("name", ""),
+                        "snippet": result.get("description", ""),
+                        "source": "knowledge_graph"
+                    }
 
     except Exception as e:
         print(f"[KNOWLEDGE GRAPH] {e}")
