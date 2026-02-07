@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GOOGLE_API_KEY = "***REMOVED***"
-GOOGLE_CX = "***REMOVED***"
+GOOGLE_API_KEY = os.getenv("GOOGLE_DEAL_API_KEY")
+GOOGLE_CX = os.getenv("GOOGLE_DEAL_CX")
 
 if not GOOGLE_API_KEY or not GOOGLE_CX:
-    raise RuntimeError("GOOGLE_API_KEY or GOOGLE_CX missing in .env")
+    raise RuntimeError("GOOGLE_DEAL_API_KEY or GOOGLE_DEAL_CX missing in .env")
 
 
 REQUEST_DELAY = 1.0
