@@ -1,66 +1,75 @@
 # db.py
 import os
-import psycopg2
-from psycopg2.extras import execute_values
-import json
+import logging
 
-# Basic DB helper — adapt to your environment.
-DB_DSN = os.getenv("POSTGRES_DSN")  # e.g. "postgresql://user:pass@host:5432/dbname"
+import psycopg2
+
+logger = logging.getLogger(__name__)
+
+DB_DSN = os.getenv("DATABASE_URL")
+
+_table_created = False
+
 
 def _get_conn():
     if not DB_DSN:
-        # If DB not configured, fallback to print-only (safe)
         return None
     return psycopg2.connect(DB_DSN)
 
-def insert_portfolio_row(record: dict):
-    """
-    Insert a single record into portfolio_companies table.
-    Table schema (minimal): source_url, investor_name, company_name, company_website, keywords (jsonb)
-    This function will try to create the table if it does not exist.
-    If DB is not configured via POSTGRES_DSN, it will just print the record.
-    """
+
+def _ensure_table(cur) -> None:
+    global _table_created
+    if _table_created:
+        return
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS portfolio_companies (
+            id SERIAL PRIMARY KEY,
+            source_url TEXT,
+            investor_name TEXT,
+            investor_website TEXT,
+            company_name TEXT,
+            company_website TEXT,
+            article_1 TEXT,
+            article_2 TEXT,
+            article_3 TEXT,
+            created_at TIMESTAMP DEFAULT now()
+        );
+    """)
+    _table_created = True
+
+
+def insert_portfolio_row(record: dict) -> None:
     if not DB_DSN:
-        print("[DB] POSTGRES_DSN not set — skipping DB insert. Record preview:", record)
+        logger.info("DATABASE_URL not set - skipping insert: %s", record.get("company_name"))
         return
 
     conn = _get_conn()
     try:
         with conn:
             with conn.cursor() as cur:
-                # ensure table exists
+                _ensure_table(cur)
                 cur.execute(
                     """
-                    CREATE TABLE IF NOT EXISTS portfolio_companies (
-                        id SERIAL PRIMARY KEY,
-                        source_url TEXT,
-                        investor_name TEXT,
-                        company_name TEXT,
-                        company_website TEXT,
-                        keywords JSONB,
-                        created_at TIMESTAMP DEFAULT now()
-                    );
-                    """
-                )
-                # insert
-                cur.execute(
-                    """
-                    INSERT INTO portfolio_companies (source_url, investor_name, company_name, company_website, keywords)
-                    VALUES (%s, %s, %s, %s, %s);
+                    INSERT INTO portfolio_companies
+                        (source_url, investor_name, investor_website,
+                         company_name, company_website,
+                         article_1, article_2, article_3)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                     """,
                     (
                         record.get("source_url"),
                         record.get("investor_name"),
+                        record.get("investor_website"),
                         record.get("company_name"),
                         record.get("company_website"),
-                        json.dumps(record.get("keywords") or []),
+                        record.get("article_1", ""),
+                        record.get("article_2", ""),
+                        record.get("article_3", ""),
                     ),
                 )
-        print("[DB] Inserted record:", record.get("company_name"))
-    except Exception as e:
-        print("[DB ERROR]", e)
+        logger.info("Inserted: %s", record.get("company_name"))
+    except psycopg2.Error as e:
+        logger.error("DB insert failed: %s", e)
     finally:
-        try:
+        if conn:
             conn.close()
-        except Exception:
-            pass
