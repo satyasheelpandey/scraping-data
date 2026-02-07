@@ -1,0 +1,10 @@
+python-dotenv
+pydantic>=2
+requests
+tqdm
+psycopg2-binary
+crawl4ai==0.7.7
+beautifulsoup4
+easyocr
+opencv-python-headless
+openai>=1.12.0
