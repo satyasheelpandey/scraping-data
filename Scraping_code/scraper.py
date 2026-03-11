@@ -1,106 +1,63 @@
 # scraper.py
 import asyncio
 import json
-import os
-from typing import List, Tuple, Set
+from typing import List, Tuple, Dict, Any
 
-from crawl4ai import AsyncWebCrawler
+import requests
+from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 
 
-# ==================================================
-# GLOBAL KEYWORD STORE (UNCHANGED)
-# ==================================================
-
-KEYWORD_FILE = "global_keywords.json"
-KEYWORDS_FILE = "keywords.json"
-
-GLOBAL_KEYWORDS: Set[str] = set()
+CRAWL_CONFIG = CrawlerRunConfig(
+    wait_until="networkidle",
+    delay_before_return_html=3.0,
+    scan_full_page=True,
+    page_timeout=30000,
+)
 
 
-def load_global_keywords() -> Set[str]:
-    global GLOBAL_KEYWORDS
+def _try_spa_data_endpoints(url: str) -> List[Dict[str, Any]]:
+    """Probe common SPA data endpoints (Gatsby, Next.js, etc.) for structured JSON."""
+    parsed = urlparse(url)
+    path = parsed.path.strip("/") or "index"
+    base = f"{parsed.scheme}://{parsed.netloc}"
 
-    if GLOBAL_KEYWORDS:
-        return GLOBAL_KEYWORDS
+    endpoints = [
+        f"{base}/page-data/{path}/page-data.json",  # Gatsby
+    ]
 
-    if not os.path.exists(KEYWORD_FILE):
-        GLOBAL_KEYWORDS = set()
-        return GLOBAL_KEYWORDS
-
-    try:
-        with open(KEYWORD_FILE, "r", encoding="utf-8") as f:
-            GLOBAL_KEYWORDS = set(json.load(f))
-    except Exception:
-        GLOBAL_KEYWORDS = set()
-
-    return GLOBAL_KEYWORDS
-
-
-
-def save_global_keywords(keywords: Set[str]):
-    global GLOBAL_KEYWORDS
-    GLOBAL_KEYWORDS.update(keywords)
-
-    with open(KEYWORD_FILE, "w", encoding="utf-8") as f:
-        json.dump(sorted(GLOBAL_KEYWORDS), f, indent=2, ensure_ascii=False)
-
-
-# ==================================================
-# NEW: KEYWORDS.JSON SAVE (ADDITIVE ONLY)
-# ==================================================
-
-def _save_keywords_to_file(new_keywords: Set[str]):
-    """
-    Append & deduplicate keywords into keywords.json
-    """
-    if not new_keywords:
-        return
-
-    existing = set()
-
-    if os.path.exists(KEYWORDS_FILE):
+    results = []
+    for endpoint in endpoints:
         try:
-            with open(KEYWORDS_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, list):
-                    existing.update(data)
-        except Exception:
+            resp = requests.get(endpoint, timeout=5)
+            ct = resp.headers.get("content-type", "")
+            if resp.status_code == 200 and "json" in ct:
+                results.append(resp.json())
+                print(f"  SPA data found: {endpoint}")
+        except requests.RequestException:
             pass
 
-    existing.update(new_keywords)
+    return results
 
-    try:
-        with open(KEYWORDS_FILE, "w", encoding="utf-8") as f:
-            json.dump(sorted(existing), f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"[KEYWORDS SAVE ERROR] {e}")
-
-
-# ==================================================
-# HTML EXTRACTION (UNCHANGED)
-# ==================================================
 
 def _extract_from_html(base_url: str, html: str, markdown: str):
     soup = BeautifulSoup(html or "", "html.parser")
     page_text = " ".join((markdown or "").split())
-
-    logo_urls = []
-    for img in soup.find_all("img"):
-        src = img.get("src") or img.get("data-src") or ""
-        if src.startswith("/"):
-            src = urljoin(base_url, src)
-        if "logo" in src.lower():
-            logo_urls.append(src)
 
     anchors = []
     for a in soup.find_all("a"):
         href = a.get("href") or ""
         if href.startswith("/"):
             href = urljoin(base_url, href)
+        # Use image alt text as fallback when link text is empty/short
+        text = a.get_text(" ", strip=True)
+        if len(text) < 3:
+            img = a.find("img")
+            if img and img.get("alt"):
+                text = img["alt"]
         anchors.append({
-            "text": a.get_text(" ", strip=True),
+            "text": text,
             "href": href,
         })
 
@@ -110,181 +67,64 @@ def _extract_from_html(base_url: str, html: str, markdown: str):
         if 30 < len(txt) < 1500:
             blocks.append(txt)
 
-    dom_chunks = []
-    for table in soup.find_all("table"):
-        dom_chunks.append(table.get_text(" ", strip=True))
+    dom_chunks = [
+        table.get_text(" ", strip=True)
+        for table in soup.find_all("table")
+    ]
 
-    embedded_json = []
+    embedded_json: List[Dict] = []
     for script in soup.find_all("script"):
         if script.string and "{" in script.string:
             try:
                 embedded_json.append(json.loads(script.string))
-            except Exception:
+            except (json.JSONDecodeError, ValueError):
                 pass
 
-    return page_text, logo_urls, anchors, blocks, dom_chunks, embedded_json, soup
+    return page_text, anchors, blocks, dom_chunks, embedded_json
 
 
-# ==================================================
-# DOM FILTER KEYWORD EXTRACTION (UNCHANGED)
-# ==================================================
-
-def extract_dom_filter_keywords(soup: BeautifulSoup) -> Set[str]:
-    keywords = set()
-
-    for option in soup.select("select option"):
-        text = option.get_text(strip=True).lower()
-        if 2 < len(text) < 40:
-            keywords.add(text)
-
-    for inp in soup.select("input[type=checkbox], input[type=radio]"):
-        label = soup.find("label", attrs={"for": inp.get("id")})
-        if label:
-            text = label.get_text(strip=True).lower()
-            if 2 < len(text) < 40:
-                keywords.add(text)
-
-    for container in soup.select(".filter, .filters, .facet, .portfolio-filter"):
-        for a in container.find_all("a"):
-            text = a.get_text(strip=True).lower()
-            if 2 < len(text) < 40:
-                keywords.add(text)
-
-    return keywords
-
-
-# ==================================================
-# FILTER URL DISCOVERY (UNCHANGED)
-# ==================================================
-
-def _discover_filter_urls(
-    base_url: str,
-    html: str,
-    global_keywords: Set[str],
-) -> Set[str]:
-    soup = BeautifulSoup(html or "", "html.parser")
-    base_domain = urlparse(base_url).netloc
-
-    filter_urls: Set[str] = set()
-
-    for a in soup.find_all("a"):
-        href = a.get("href")
-        if not href:
-            continue
-
-        href_lower = href.lower()
-
-        # this link does not contain any of the global keywords
-        
-        
-        
-        
-
-        if not any(k in href_lower for k in global_keywords):
-            continue
-
-        full_url = urljoin(base_url, href)
-
-        try:
-            if urlparse(full_url).netloc != base_domain:
-                continue
-        except Exception:
-            continue
-
-        filter_urls.add(full_url)
-
-    return filter_urls
-
-
-# ==================================================
-# ASYNC CRAWL (MINIMAL ADDITION ONLY)
-# ==================================================
-
-async def _crawl_all_states(url: str):
+async def _crawl(url: str) -> List[Tuple[str, str]]:
+    """Crawl a URL with JS rendering and return (html, markdown) snapshots."""
     snapshots: List[Tuple[str, str]] = []
-
-    global_keywords = load_global_keywords()
-
     async with AsyncWebCrawler() as crawler:
         try:
-            res = await crawler.arun(url=url)
+            res = await crawler.arun(url=url, config=CRAWL_CONFIG)
             snapshots.append((res.html or "", res.markdown or ""))
-        except Exception as e:
-            print(f"[SCRAPER] Base crawl failed: {e}")
-            return snapshots, global_keywords
+        except (TimeoutError, RuntimeError, OSError) as e:
+            print(f"[SCRAPER] Crawl failed: {e}")
+    return snapshots
 
-        soup = BeautifulSoup(res.html or "", "html.parser")
-        new_keywords = extract_dom_filter_keywords(soup)
-
-        if new_keywords:
-            print(f"➕ New DOM keywords found: {sorted(new_keywords)}")
-
-        # 🔹 ADDITION: save keywords
-        _save_keywords_to_file(new_keywords)
-
-        global_keywords.update(new_keywords)
-        save_global_keywords(global_keywords)
-
-        filter_urls = _discover_filter_urls(url, res.html or "", global_keywords)
-        filter_urls.discard(url)
-
-        if filter_urls:
-            print("🔎 Filter function invoked")
-
-        for f_url in list(filter_urls)[:15]:
-            try:
-                print(f"   🔹 Crawling filtered state: {f_url}")
-                fres = await crawler.arun(url=f_url)
-                snapshots.append((fres.html or "", fres.markdown or ""))
-            except Exception as e:
-                print(f"[SCRAPER] Skipping filtered URL: {f_url} ({e})")
-
-    return snapshots, global_keywords
-
-
-# ==================================================
-# PUBLIC API (UNCHANGED)
-# ==================================================
 
 def crawl_portfolio_page(url: str):
     try:
-        snapshots, keywords = asyncio.run(_crawl_all_states(url))
+        snapshots = asyncio.run(_crawl(url))
     except Exception as e:
         print(f"[SCRAPER ERROR] {url}: {e}")
-        return "", [], [], [], [], [], []
+        return "", [], [], [], []
 
     all_text = []
-    all_logos = set()
     all_anchors = []
     all_blocks = []
     all_chunks = []
     all_json = []
 
     for html, markdown in snapshots:
-        (
-            text,
-            logos,
-            anchors,
-            blocks,
-            chunks,
-            embedded,
-            _,
-        ) = _extract_from_html(url, html, markdown)
-
+        text, anchors, blocks, chunks, embedded = _extract_from_html(url, html, markdown)
         if text:
             all_text.append(text)
-        all_logos.update(logos)
         all_anchors.extend(anchors)
         all_blocks.extend(blocks)
         all_chunks.extend(chunks)
         all_json.extend(embedded)
 
+    # Probe common SPA data endpoints for structured JSON
+    spa_data = _try_spa_data_endpoints(url)
+    all_json.extend(spa_data)
+
     return (
         " ".join(all_text),
-        list(all_logos),
         list({(a["text"], a["href"]): a for a in all_anchors}.values()),
         list(set(all_blocks)),
         list(set(all_chunks)),
         all_json,
-        sorted(keywords),
     )
