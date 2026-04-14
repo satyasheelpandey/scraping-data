@@ -31,20 +31,42 @@ class RateLimitError(Exception):
 # --- domain / path scoring constants ---
 
 BLOCKED_DOMAINS = {
+    # Data aggregators / paywalled databases
     "pitchbook.com",
+    "preqin.com",
+    "mergr.com",
+    "tracxn.com",
+    "crunchbase.com",
+    "teaserclub.com",
+    "marketbeat.com",
+    # Press release wires (low-quality / duplicated)
     "prnewswire.com",
     "prweb.com",
-    "preqin.com",
+    # General news / paywalled
+    "reuters.com",
+    "bloomberg.com",
+    "wsj.com",
+    "forbes.com",
+    "techcrunch.com",
+    # Competitor / industry aggregators
+    "privateequitywire.co.uk",
+    "buyoutsinsider.com",
+    "finsmes.com",
+    "citybiz.co",
+    "legaltech-talk.com",
+    # Irrelevant / user-generated
+    "drugs.com",
+    "indeed.com",
+    "slideshare.net",
+    "medium.com",
+    # Government registries
     "find-and-update.company-information.service.gov.uk",
 }
 
 HIGH_VALUE_DOMAINS = {
     "businesswire.com", "globenewswire.com",
-    "reuters.com", "bloomberg.com", "ft.com", "wsj.com",
-    "cnbc.com", "dealogic.com",
-    "privateequitywire.co.uk",
-    "pe-hub.com", "buyoutsinsider.com", "mergr.com",
-    "techcrunch.com", "finsmes.com", "thesaasnews.com",
+    "ft.com", "cnbc.com", "dealogic.com",
+    "pe-hub.com", "thesaasnews.com",
 }
 
 LOW_VALUE_DOMAINS = {

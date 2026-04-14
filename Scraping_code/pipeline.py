@@ -3,35 +3,49 @@ import csv
 import ipaddress
 import logging
 import socket
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
 from processor import process_portfolio_url
-from utils.investor import extract_investor_name
 
 logger = logging.getLogger(__name__)
 
 MAX_URL_LENGTH = 2048
 
-INPUT_FILE = Path("input_urls.csv")
+INPUT_FILE = Path("../input_urls.csv")
 OUTPUT_DIR = Path("output")
-OUTPUT_FILE = OUTPUT_DIR / "output.csv"
 
 OUTPUT_FIELDS = [
-    "source_url",
-    "investor_name",
-    "investor_website",
-    "company_name",
-    "company_website",
+    "url",
+    "investor",
+    "investor_link",
+    "company",
+    "company_url",
+    "company_status",
+    "strategy",
     "article_1",
     "article_2",
     "article_3",
+    "announcement_date",
+    "deal_type",
+    "deal_value",
+    "deal_value_text",
+    "currency",
+    "deal_stage",
+    "strategic_rationale",
+    "source_article_url",
 ]
 
 BLOCKED_HOSTS = {
     "metadata.google.internal",
     "metadata.google.internal.",
 }
+
+
+def _field(row: dict, key: str) -> str:
+    """Extract a stripped string field from a CSV row."""
+    return (row.get(key) or "").strip()
 
 
 def _is_safe_url(url: str) -> bool:
@@ -71,25 +85,18 @@ def _is_safe_url(url: str) -> bool:
     return True
 
 
-def _derive_investor_website(source_url: str) -> str:
-    """Extract base domain from portfolio URL as investor website."""
-    try:
-        parsed = urlparse(source_url)
-        return f"{parsed.scheme}://{parsed.netloc}"
-    except ValueError:
-        return ""
-
-
-def load_processed_urls(output_file: Path) -> set[str]:
-    """Load already-processed source URLs for resume support."""
-    if not output_file.exists():
-        return set()
-    with open(output_file, newline="", encoding="utf-8") as f:
-        return {
-            row["source_url"].strip()
-            for row in csv.DictReader(f)
-            if (row.get("source_url") or "").strip()
-        }
+def load_processed_keys(output_dir: Path) -> set[tuple[str, str, str]]:
+    """Load already-processed (url, company_status, strategy) tuples from all output files."""
+    keys: set[tuple[str, str, str]] = set()
+    if not output_dir.exists():
+        return keys
+    for csv_file in output_dir.glob("output_*.csv"):
+        with open(csv_file, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                url = _field(row, "url")
+                if url:
+                    keys.add((url, _field(row, "company_status"), _field(row, "strategy")))
+    return keys
 
 
 def run_pipeline() -> None:
@@ -97,67 +104,79 @@ def run_pipeline() -> None:
         raise FileNotFoundError(f"{INPUT_FILE} not found")
 
     OUTPUT_DIR.mkdir(exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_file = OUTPUT_DIR / f"output_{timestamp}.csv"
 
-    # 1. Read and validate input URLs
+    # 1. Read and validate input rows via DictReader
     with open(INPUT_FILE, newline="", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        raw_urls = [
-            row[0].strip()
-            for row in reader
-            if row and row[0].strip().startswith("http")
-        ]
+        input_rows = []
+        for row in csv.DictReader(f):
+            url = _field(row, "url")
+            if not url.startswith("http"):
+                continue
+            if _is_safe_url(url):
+                input_rows.append(row)
+            else:
+                logger.warning("Skipping unsafe URL: %s", url)
 
-    input_urls = []
-    for url in raw_urls:
-        if _is_safe_url(url):
-            input_urls.append(url)
-        else:
-            logger.warning("Skipping unsafe URL: %s", url)
-
-    if not input_urls:
+    if not input_rows:
         print("No valid URLs found in input file")
         return
 
-    # 2. Resume logic
-    processed_urls = load_processed_urls(OUTPUT_FILE)
-    urls_to_process = [u for u in input_urls if u not in processed_urls]
+    # 2. Resume logic — track (url, company_status, strategy) tuples across all runs
+    processed_keys = load_processed_keys(OUTPUT_DIR)
+    rows_to_process = [
+        row for row in input_rows
+        if (_field(row, "url"), _field(row, "company_status"), _field(row, "strategy"))
+        not in processed_keys
+    ]
 
-    print(f"URLs in input file : {len(input_urls)}")
-    print(f"Already processed  : {len(processed_urls)}")
-    print(f"URLs to process now: {len(urls_to_process)}")
+    print(f"Rows in input file : {len(input_rows)}")
+    print(f"Already processed  : {len(processed_keys)}")
+    print(f"Rows to process now: {len(rows_to_process)}")
 
-    if not urls_to_process:
+    if not rows_to_process:
         print("Nothing to process.")
         return
 
-    # 3. Process each portfolio URL
-    file_exists = OUTPUT_FILE.exists()
-
-    with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as f:
+    # 3. Process each portfolio URL — each run writes a new timestamped file
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=OUTPUT_FIELDS)
-        if not file_exists:
-            writer.writeheader()
+        writer.writeheader()
 
-        for source_url in urls_to_process:
-            investor_name = extract_investor_name(source_url)
-            investor_website = _derive_investor_website(source_url)
+        for row in rows_to_process:
+            source_url = _field(row, "url")
+            investor_name = _field(row, "investor_name")
+            investor_link = _field(row, "investor_link")
+            company_status = _field(row, "company_status")
+            strategy = _field(row, "strategy")
+            filter_type = _field(row, "filter_type")
+            js_status_filter = _field(row, "js_status_filter")
+            js_strategy_filter = _field(row, "js_strategy_filter")
 
             print(f"\nProcessing : {source_url}")
             print(f"Investor   : {investor_name}")
-            print(f"Website    : {investor_website}")
+            print(f"Link       : {investor_link}")
+            print(f"Status     : {company_status}")
+            print(f"Strategy   : {strategy}")
+            if filter_type == "js_click":
+                print(f"JS Filter  : status={js_status_filter!r}, strategy={js_strategy_filter!r}")
 
             try:
                 process_portfolio_url(
                     source_url=source_url,
                     investor_name=investor_name,
-                    investor_website=investor_website,
+                    investor_link=investor_link,
+                    company_status=company_status,
+                    strategy=strategy,
+                    js_status_filter=js_status_filter if filter_type == "js_click" else "",
+                    js_strategy_filter=js_strategy_filter if filter_type == "js_click" else "",
                     csv_writer=writer,
                 )
             except Exception as e:
                 print(f"Pipeline failure for {source_url}: {e}")
 
-    print(f"\nDone. Output written to {OUTPUT_FILE}")
+    print(f"\nDone. Output written to {output_file}")
 
 
 if __name__ == "__main__":

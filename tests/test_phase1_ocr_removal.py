@@ -51,7 +51,6 @@ class TestOCRRemoval:
             result = extract_company_seeds(
                 source_url="https://example.com",
                 investor_name="Test Fund",
-                page_text="Test content",
                 anchors=[],
                 blocks=[],
                 dom_chunks=[],
@@ -68,27 +67,27 @@ class TestOCRRemoval:
         # Mock all external dependencies
         with patch('processor.crawl_portfolio_page') as mock_crawl, \
              patch('processor.extract_company_seeds') as mock_extract, \
-             patch('processor.crawl_domain') as mock_domain, \
-             patch('processor.insert_portfolio_row') as mock_insert:
+             patch('processor.find_official_company_website') as mock_google, \
+             patch('processor.find_deal_articles') as mock_deals:
 
             # Setup mocks
             mock_crawl.return_value = (
                 "test text",  # page_text
-                [],           # logo_urls (not used after OCR removal)
                 [],           # anchors
                 [],           # blocks
                 [],           # dom_chunks
                 [],           # embedded_json
-                set()         # dom_filter_keywords
             )
 
             mock_extract.return_value = []
-            mock_domain.return_value = {}
+            mock_google.return_value = ""
+            mock_deals.return_value = {"articles": []}
 
             # Call should work without OCR processing
             result = process_portfolio_url(
                 source_url="https://example.com/portfolio",
-                investor_name="Test Investor"
+                investor_name="Test Investor",
+                investor_link="https://example.com",
             )
 
             # Verify OCR was not called (will pass after refactoring)
@@ -210,24 +209,19 @@ class TestIntegrationAfterOCRRemoval:
         # Mock all external dependencies
         with patch('processor.crawl_portfolio_page') as mock_crawl, \
              patch('processor.extract_company_seeds') as mock_extract, \
-             patch('processor.crawl_domain') as mock_domain, \
              patch('processor.find_official_company_website') as mock_google, \
-             patch('processor.insert_portfolio_row') as mock_insert, \
-             patch('processor.fuse_deep_profile') as mock_fuse, \
-             patch('processor.select_company_docs') as mock_select:
+             patch('processor.find_deal_articles') as mock_deals:
 
             from processor import process_portfolio_url
-            from schema import CompanySeed, PortfolioCsvRow
+            from schema import CompanySeed
 
             # Setup mocks
             mock_crawl.return_value = (
                 "Acme Corp is a leading software company",
-                [],  # logo_urls
                 [{"text": "Acme Corp", "href": "https://acme.com"}],
                 ["Acme Corp"],
                 [],
                 [],
-                set()
             )
 
             mock_extract.return_value = [
@@ -239,26 +233,19 @@ class TestIntegrationAfterOCRRemoval:
                 )
             ]
 
-            mock_domain.return_value = {}
-            mock_select.return_value = []
-
-            mock_fuse.return_value = PortfolioCsvRow(
-                source_url="https://fund.com/portfolio",
-                investor_name="Test Fund",
-                company_name="Acme Corp",
-                company_website="https://acme.com"
-            )
+            mock_google.return_value = "https://acme.com"
+            mock_deals.return_value = {"articles": [{"url": "https://deal.com/1", "score": 5}]}
 
             # Execute pipeline
             result = process_portfolio_url(
                 source_url="https://fund.com/portfolio",
-                investor_name="Test Fund"
+                investor_name="Test Fund",
+                investor_link="https://fund.com",
             )
 
             # Should complete successfully
             assert result is True
             assert mock_extract.called
-            assert mock_insert.called
 
 
 if __name__ == "__main__":
