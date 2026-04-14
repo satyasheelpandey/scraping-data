@@ -1,0 +1,318 @@
+url,investor_name,investor_link,company_status,strategy,filter_type,js_status_filter,js_strategy_filter,notes
+https://www.adamsstreetpartners.com/entrepreneurs/growth-equity-investments/?fwp_growth_equity_transactions=current,Adams Street Partners,https://www.adamsstreetpartners.com,current,growth,url_param,,,FacetWP select - current transactions
+https://www.adamsstreetpartners.com/entrepreneurs/growth-equity-investments/?fwp_growth_equity_transactions=exited,Adams Street Partners,https://www.adamsstreetpartners.com,exited,growth,url_param,,,FacetWP select - exited transactions
+https://argos.fund/portfolio/,Argos,https://argos.fund,current,mid_cap,none,,,Static HTML. All companies are current. Internal /portfolio/slug/
+https://www.equistonepe.com/investments,Equistone,https://www.equistonepe.com,current,,js_click,Current,,JS tabs All/Current/Realised
+https://www.equistonepe.com/investments,Equistone,https://www.equistonepe.com,exited,,js_click,Realised,,JS tabs All/Current/Realised
+https://www.hkwinc.com/investment/,HKW,https://www.hkwinc.com,current,,js_click,Current,,JS buttons All/Current/Exited
+https://www.hkwinc.com/investment/,HKW,https://www.hkwinc.com,exited,,js_click,Exited,,JS buttons All/Current/Exited
+https://hadleyfamilycapital.com/portfolio/,Hadley Family Capital,https://hadleyfamilycapital.com,current,,js_click,Current,,JS: Current/Past status + Search Fund/Operating type
+https://hadleyfamilycapital.com/portfolio/,Hadley Family Capital,https://hadleyfamilycapital.com,exited,,js_click,Past,,JS: Current/Past status
+https://ikpartners.com/investments/,IK Partners,https://ikpartners.com,current,mid_cap,js_click,Current,Mid Cap,Excel: FILTER STRATEGY TO MID CAP FIRST
+https://ikpartners.com/investments/,IK Partners,https://ikpartners.com,exited,mid_cap,js_click,Realised,Mid Cap,Excel: FILTER STRATEGY TO MID CAP FIRST
+https://www.accel-kkr.com/portfolio/,Accel-KKR,https://www.accel-kkr.com,current,,js_click,Current Investment,,Default shows Current. Status button to switch
+https://www.accel-kkr.com/portfolio/,Accel-KKR,https://www.accel-kkr.com,exited,,js_click,Past Investment,,Status button for past investments
+https://www.actoncapital.com/portfolio,Acton Capital,https://www.actoncapital.com,current,,js_click,Current,,Shows Exited label per company. JS filter
+https://www.actoncapital.com/portfolio,Acton Capital,https://www.actoncapital.com,exited,,js_click,Exited,,Shows Exited label per company. JS filter
+https://www.adenia.com/investments/,Adenia,https://www.adenia.com,current,,js_click,Current,,Pan-African. AC(III)=exited AC(IV/V)=current. JS by fund
+https://www.adenia.com/investments/,Adenia,https://www.adenia.com,exited,,js_click,Exited,,Pan-African. AC(III)=exited
+https://affirmacapital.com/portfolio.html,Affirma Capital,https://affirmacapital.com,current,,js_click,Active,,Status: Active / Partially Realised / Realised
+https://affirmacapital.com/portfolio.html,Affirma Capital,https://affirmacapital.com,exited,,js_click,Realised,,Status: Realised
+https://www.aislingcapital.com/portfolio/,Aisling Capital,https://www.aislingcapital.com,current,venture,js_click,Current,,Healthcare VC
+https://www.aislingcapital.com/portfolio/,Aisling Capital,https://www.aislingcapital.com,exited,venture,js_click,Exited,,Healthcare VC
+https://www.alantra.com/what-we-do/alternative-asset-management/private-equity/portfolio/,Alantra,https://www.alantra.com,all,,none,,,Static HTML. Current Investment/Former Investment labels visible per company
+https://americanindustrial.com/portfolio/current-investments/,American Industrial Partners,https://americanindustrial.com,current,,none,,,Static sub-page for current investments
+https://americanindustrial.com/portfolio/,American Industrial Partners,https://americanindustrial.com,exited,,js_click,Previous Investments,,JS filter for previous investments
+https://argosycapital.com/private-equity/companies/,Argosy Capital,https://argosycapital.com,all,,none,,,Static HTML. Status (Active/Exited) visible per company
+https://athyrium.com/portfolio/,Athyrium Capital,https://athyrium.com,current,,js_click,Current,,JS-rendered
+https://athyrium.com/portfolio/,Athyrium Capital,https://athyrium.com,exited,,js_click,Exited,,JS-rendered
+https://www.azuliscapital.fr/en/our-investments,Azulis Capital,https://www.azuliscapital.fr,all,,none,,,Static HTML. Unrealized/Realized labels per company. Excel: Hide realized checkbox
+https://hawkinfinity.com/our-portfolio/,Hawk Infinity,https://hawkinfinity.com,current,venture,none,,,Static HTML VC portfolio
+https://www.triton-partners.com/portfolio/,Triton Partners,https://www.triton-partners.com,current,mid_cap,none,,,Static HTML. Excel: Only Mid-Market strategy needs scraping
+https://www.explorerinvestments.com/home/portfolio/,Explorer Investments,https://www.explorerinvestments.com,current,growth,js_click,,,JS-rendered. Excel: Only growth strategy needs scraping
+https://greshamhouseventures.com/portfolio/,Gresham House Ventures,https://greshamhouseventures.com,current,venture,none,,,Static HTML. Excel: Different pages
+https://www.crewstoneinternational.com/,Crewstone International,https://www.crewstoneinternational.com,current,,js_click,,,Needs browser recon
+https://seligmanselect.com/portfolio-companies,Seligman Select,https://seligmanselect.com,current,,js_click,,,JS-rendered. Fund-of-funds
+https://www.ttcapitalpartners.com/portfolio/,TT Capital Partners,https://www.ttcapitalpartners.com,current,,none,,,Static HTML. Healthcare PE. All current
+https://www.gtcr.com/investments/,GTCR,https://www.gtcr.com,current,,js_click,Current,,JS-rendered
+https://www.gtcr.com/investments/,GTCR,https://www.gtcr.com,exited,,js_click,Exited,,JS-rendered
+https://www.bnpparibasdeveloppement.com/nos-participations,BNP Paribas Développement,https://www.bnpparibasdeveloppement.com,current,development,js_click,Current,Développement,Excel: CapDev and Venture Separate
+https://www.bnpparibasdeveloppement.com/nos-participations,BNP Paribas Développement,https://www.bnpparibasdeveloppement.com,current,venture,js_click,Current,Venture / Innovation,Excel: CapDev and Venture Separate
+https://www.bnpparibasdeveloppement.com/nos-participations,BNP Paribas Développement,https://www.bnpparibasdeveloppement.com,exited,development,js_click,Exited,Développement,Excel: CapDev and Venture Separate
+https://www.bnpparibasdeveloppement.com/nos-participations,BNP Paribas Développement,https://www.bnpparibasdeveloppement.com,exited,venture,js_click,Exited,Venture / Innovation,Excel: CapDev and Venture Separate
+https://www.corpacq.com/group,CorpAcq,https://www.corpacq.com,current,,js_click,,,Buy-and-hold. All current
+https://www.firstreserve.com/portfolio,First Reserve,https://www.firstreserve.com,current,,none,,,Static HTML. All companies labeled Current. Energy/infrastructure
+https://www.caleracapital.com/portfolio/,Calera Capital,https://www.caleracapital.com,current,,js_click,,,Excel URL was /sector-focus/ - use /portfolio/
+https://www.bertramcapital.com/portfolio,Bertram Capital,https://www.bertramcapital.com,current,,js_click,Current,,JS-rendered
+https://www.bertramcapital.com/portfolio,Bertram Capital,https://www.bertramcapital.com,exited,,js_click,Exited,,JS-rendered
+https://argonautpe.com/portfolio/,Argonaut PE,https://argonautpe.com,current,,none,,,Static HTML. All current portfolio
+https://www.vistaequitypartners.com/about/companies/,Vista Equity Partners,https://www.vistaequitypartners.com,current,,js_click,Current,,Excel: Filter on Fund. Has Endeavor/Flagship/Foundation/Perennial
+https://www.vistaequitypartners.com/about/companies/,Vista Equity Partners,https://www.vistaequitypartners.com,exited,,js_click,Former,,Excel: Filter on Fund
+https://www.vectorcapital.com/investments,Vector Capital,https://www.vectorcapital.com,current,,js_click,Current,,Excel: Filter out Credit (Deal Type Separately)
+https://www.vectorcapital.com/investments,Vector Capital,https://www.vectorcapital.com,exited,,js_click,Exited,,Excel: Filter out Credit
+https://updata.com/portfolio/,Updata Partners,https://updata.com,current,,js_click,Current,,JS-rendered SPA
+https://updata.com/portfolio/,Updata Partners,https://updata.com,exited,,js_click,Exited,,JS-rendered SPA
+https://www.ui-investissement.com/nos-investissements/,UI Investissement,https://www.ui-investissement.com,current,,js_click,En portefeuille,,Excel: Filter on Métier
+https://www.ui-investissement.com/nos-investissements/,UI Investissement,https://www.ui-investissement.com,exited,,js_click,Cédées,,Excel: Filter on Métier
+https://tvvcapital.com/portfolio,TVV Capital,https://tvvcapital.com,all,,none,,,SKIP: Site does not publish acquisitions
+https://www.palamon.com/investments,Palamon,https://www.palamon.com,current,,js_click,Unrealized,,Excel: Filter Realized/Unrealized
+https://www.palamon.com/investments,Palamon,https://www.palamon.com,exited,,js_click,Realized,,Excel: Filter Realized/Unrealized
+https://www.bgf.co.uk/portfolio/?investmentStage=Growth,BGF,https://www.bgf.co.uk,all,growth,url_param,,,Excel: Filter Growth Early Stage Quoted. Status visible per company
+https://www.bgf.co.uk/portfolio/?investmentStage=Early+Stage,BGF,https://www.bgf.co.uk,all,venture,url_param,,,Early Stage investments
+https://www.bgf.co.uk/portfolio/?investmentStage=Quoted,BGF,https://www.bgf.co.uk,all,growth,url_param,,,Quoted companies
+https://georgian.io/companies/,Georgian,https://georgian.io,current,venture,js_click,Current,,JS-rendered VC
+https://georgian.io/companies/,Georgian,https://georgian.io,exited,venture,js_click,Exited,,JS-rendered VC
+https://www.marlinequity.com/portfolio/,Marlin Equity,https://www.marlinequity.com,current,,js_click,Current,,Excel: Filter Apply by akshat
+https://www.marlinequity.com/portfolio/,Marlin Equity,https://www.marlinequity.com,exited,,js_click,Exited,,Excel: Filter Apply by akshat
+https://www.haspa-bgm.de/portfolio,Haspa BGM,https://www.haspa-bgm.de,current,,js_click,Current,,German PE
+https://www.haspa-bgm.de/portfolio,Haspa BGM,https://www.haspa-bgm.de,exited,,js_click,Exited,,German PE
+https://www.whitewolfcapital.com/portfolio/,White Wolf Capital,https://www.whitewolfcapital.com,current,,js_click,Current,,Excel: Filter Apply by akshat
+https://www.whitewolfcapital.com/portfolio/,White Wolf Capital,https://www.whitewolfcapital.com,exited,,js_click,Exited,,Excel: Filter Apply by akshat
+https://www.dpe.de/en/investments/,DPE,https://www.dpe.de,current,,js_click,Active,,Excel: Filter on status
+https://www.dpe.de/en/investments/,DPE,https://www.dpe.de,exited,,js_click,Divested,,Excel: Filter on status
+https://www.creditmutuel-equity.eu/en/portfolio.html,Credit Mutuel Equity,https://www.creditmutuel-equity.eu,current,,js_click,En cours,,Excel: Filter on Operation
+https://www.creditmutuel-equity.eu/en/portfolio.html,Credit Mutuel Equity,https://www.creditmutuel-equity.eu,exited,,js_click,Cédé,,Excel: Filter on Operation
+https://creador.com/portfolio/,Creador,https://creador.com,current,,js_click,Current,,SE Asia PE
+https://creador.com/portfolio/,Creador,https://creador.com,exited,,js_click,Exited,,SE Asia PE
+https://www.livingbridge.com/portfolio,Livingbridge,https://www.livingbridge.com,current,,js_click,Current,,Excel: Investment Status Current/Realized
+https://www.livingbridge.com/portfolio,Livingbridge,https://www.livingbridge.com,exited,,js_click,Realized,,Excel: Investment Status Current/Realized
+https://gaugecapital.com/portfolio,Gauge Capital,https://gaugecapital.com,current,,js_click,Current,,Excel: Filter on current/realized
+https://gaugecapital.com/portfolio,Gauge Capital,https://gaugecapital.com,exited,,js_click,Realized,,Excel: Filter on current/realized
+https://www.windsailcapital.com/portfolio,Wind Sail Capital,https://www.windsailcapital.com,current,,js_click,Current Investment,,Excel: Filter Status Current/Past Investment
+https://www.windsailcapital.com/portfolio,Wind Sail Capital,https://www.windsailcapital.com,exited,,js_click,Past Investment,,Excel: Filter Status Current/Past Investment
+https://falfurrias.com/funds-and-portfolio/,Falfurrias Capital,https://falfurrias.com,current,,js_click,Current Investment,,Excel: Filter Status Current/Past + fund types
+https://falfurrias.com/funds-and-portfolio/,Falfurrias Capital,https://falfurrias.com,exited,,js_click,Past Investment,,Excel: Filter Status Current/Past
+https://www.lynxequity.com/portfolio,Lynx Equity,https://www.lynxequity.com,current,,none,,,Small Canadian PE
+https://oakhill.com/investments/,Oak Hill,https://oakhill.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://oakhill.com/investments/,Oak Hill,https://oakhill.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://www.sycamorepartners.com/investments,Sycamore Partners,https://www.sycamorepartners.com,current,,js_click,Current,,Retail-focused PE
+https://www.sycamorepartners.com/investments,Sycamore Partners,https://www.sycamorepartners.com,exited,,js_click,Exited,,Retail-focused PE
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,current,buyout,js_click,Current,Buyout,Excel: Buyout Partnership Capital Enterprise
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,exited,buyout,js_click,Realized,Buyout,Excel: Buyout Partnership Capital Enterprise
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,current,partnership,js_click,Current,Partnership Capital,Excel: Buyout Partnership Capital Enterprise
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,exited,partnership,js_click,Realized,Partnership Capital,Excel: Buyout Partnership Capital Enterprise
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,current,growth,js_click,Current,Enterprise,Excel: Buyout Partnership Capital Enterprise
+https://www.inflexion.com/portfolio/,Inflexion,https://www.inflexion.com,exited,growth,js_click,Realized,Enterprise,Excel: Buyout Partnership Capital Enterprise
+https://www.trmequity.com/transactions,TRM Equity,https://www.trmequity.com,current,,js_click,Current,,
+https://www.trmequity.com/transactions,TRM Equity,https://www.trmequity.com,exited,,js_click,Realized,,
+https://www.perwyn.com/investments,Perwyn,https://www.perwyn.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://www.perwyn.com/investments,Perwyn,https://www.perwyn.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://www.stirlingsquare.com/investments,Stirling Square,https://www.stirlingsquare.com,current,,js_click,Current,,European mid-market
+https://www.stirlingsquare.com/investments,Stirling Square,https://www.stirlingsquare.com,exited,,js_click,Exited,,European mid-market
+https://tamarixcapital.com/credit/#portfolio,Tamarix Capital,https://tamarixcapital.com,current,credit,none,,,Credit fund portfolio section
+https://www.halder.eu/portfolio?limit=24,Halder,https://www.halder.eu,current,,js_click,Aktiv,,Excel: Filter Current/Realized
+https://www.halder.eu/portfolio?limit=24,Halder,https://www.halder.eu,exited,,js_click,Exit,,Excel: Filter Current/Realized
+https://thehalifaxgroup.com/our-portfolio/,The Halifax Group,https://thehalifaxgroup.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://thehalifaxgroup.com/our-portfolio/,The Halifax Group,https://thehalifaxgroup.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://harvestpartners.com/portfolio-investments/,Harvest Partners,https://harvestpartners.com,current,buyout,js_click,Current,Private Equity,Excel: Filter by Strategy and Status
+https://harvestpartners.com/portfolio-investments/,Harvest Partners,https://harvestpartners.com,exited,buyout,js_click,Realized,Private Equity,Excel: Filter by Strategy and Status
+https://harvestpartners.com/portfolio-investments/,Harvest Partners,https://harvestpartners.com,current,credit,js_click,Current,Structured Capital,Excel: Filter by Strategy and Status
+https://harvestpartners.com/portfolio-investments/,Harvest Partners,https://harvestpartners.com,exited,credit,js_click,Realized,Structured Capital,Excel: Filter by Strategy and Status
+https://www.jflco.com/portfolio,JF Lehman & Co,https://www.jflco.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://www.jflco.com/portfolio,JF Lehman & Co,https://www.jflco.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://www.acgpartners.com/partner-brands,ACG Partners,https://www.acgpartners.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://www.acgpartners.com/partner-brands,ACG Partners,https://www.acgpartners.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://colcap.com/our-portfolio/,Colcap,https://colcap.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://colcap.com/our-portfolio/,Colcap,https://colcap.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://www.gradientesgr.it/en/portfolio/,Gradiente SGR,https://www.gradientesgr.it,current,,none,,,Italian PE
+https://abscapital.com/portfolio/,ABS Capital,https://abscapital.com,current,,js_click,Active,,Excel: Active/Realized
+https://abscapital.com/portfolio/,ABS Capital,https://abscapital.com,exited,,js_click,Realized,,Excel: Active/Realized
+https://abry.com/companies/,ABRY Partners,https://abry.com,current,,js_click,Current,,Excel: First filter by Fund. Multiple funds available
+https://abry.com/companies/,ABRY Partners,https://abry.com,exited,,js_click,Exited,,Excel: First filter by Fund
+http://www.6dimensionscapital.com/en/portfolio/,6 Dimensions Capital,http://www.6dimensionscapital.com,current,,js_click,Current,,
+http://www.6dimensionscapital.com/en/portfolio/,6 Dimensions Capital,http://www.6dimensionscapital.com,exited,,js_click,Exited,,
+https://www.zcg.com/our-portfolio/,ZCG,https://www.zcg.com,current,,none,,,
+https://patriot-capital.com/portfolio/,Patriot Capital,https://patriot-capital.com,current,,none,,,
+https://penfund.com/portfolio/,Penfund,https://penfund.com,current,,js_click,Current,,Excel: Prime/I II III ETC filter by fund
+https://penfund.com/portfolio/,Penfund,https://penfund.com,exited,,js_click,Realized,,Excel: Filter by fund
+https://www.ca-idia.com/en/investments/,IDIA Capital Investissement,https://www.ca-idia.com,current,development,js_click,Current,Agri-food / Agro-industry,Excel: First filter by Agri-food/Agro-industry
+https://www.ca-idia.com/en/investments/,IDIA Capital Investissement,https://www.ca-idia.com,exited,development,js_click,Exited,Agri-food / Agro-industry,Excel: First filter by Agri-food/Agro-industry
+https://www.volarisgroup.com/portfolio/?,Volaris Group,https://www.volarisgroup.com,current,,none,,,Vertical software acquirer. All current
+https://www.investag.at/portfolio/,InvestAG,https://www.investag.at,all,,none,,,Excel: Active and Exit on page itself
+https://500.co/portfolio,500 Global,https://500.co,current,venture,js_click,Active,,Excel: Filter by Exited / Everything else
+https://500.co/portfolio,500 Global,https://500.co,exited,venture,js_click,Exited,,Excel: Filter by Exited / Everything else
+https://www.baincapitalprivateequity.com/portfolio,Bain Capital PE,https://www.baincapitalprivateequity.com,current,,js_click,Current,,Large-cap PE
+https://www.baincapitalprivateequity.com/portfolio,Bain Capital PE,https://www.baincapitalprivateequity.com,exited,,js_click,Exited,,Large-cap PE
+https://www.cvc.com/portfolio/our-portfolio/?strategy=all&country=all&industries=all&partner=all&cardName=null,CVC Capital Partners,https://www.cvc.com,all,,url_param,,,Excel: Filter by strategy. URL params available
+https://www.foresight.group/growing-companies/portfolio-companies/,Foresight Group,https://www.foresight.group,current,,none,,,UK growth PE
+https://www.farragutcapitalpartners.com/portfolio,Farragut Capital,https://www.farragutcapitalpartners.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://www.farragutcapitalpartners.com/portfolio,Farragut Capital,https://www.farragutcapitalpartners.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://cyprium.com/portfolio/,Cyprium,https://cyprium.com,current,,url_param,,,Current: /portfolio/ (no param)
+https://cyprium.com/portfolio/?_sfm_status=Former,Cyprium,https://cyprium.com,exited,,url_param,,,SearchAndFilter param for Former/exited
+https://rivieracp.com/portfolio/,Riviera Capital Partners,https://rivieracp.com,current,,none,,,
+https://www.meritcapital.com/portfolio/,Merit Capital,https://www.meritcapital.com,all,,none,,,Excel: Current or Exit shown on company detail page
+https://www.gladstonecapital.com/portfolio,Gladstone Capital,https://www.gladstonecapital.com,current,,js_click,Current,,BDC
+https://www.gladstonecapital.com/portfolio,Gladstone Capital,https://www.gladstonecapital.com,exited,,js_click,Exited,,BDC
+https://www.gladstoneinvestment.com/portfolio/current-investment-portfolio,Gladstone Investment,https://www.gladstoneinvestment.com,current,,none,,,Static current portfolio page
+https://www.gladstoneinvestment.com/portfolio/,Gladstone Investment,https://www.gladstoneinvestment.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://palatinepe.com/portfolio/,Palatine,https://palatinepe.com,current,buyout,js_click,Current,Buyout,Excel: First filter by Buyout
+https://palatinepe.com/portfolio/,Palatine,https://palatinepe.com,exited,buyout,js_click,Realized,Buyout,Excel: First filter by Buyout
+https://www.franciscopartners.com/investments,Francisco Partners,https://www.franciscopartners.com,all,,none,,,Static HTML. Current/Exited visible per company. Excel: Credit/Private Equity
+https://www.ta.com/portfolio/investments/,TA Associates,https://www.ta.com,all,,none,,,Static HTML. Acquired by = exited. Internal /portfolio/investments/slug/
+https://montagu.com/portfolio/,Montagu,https://montagu.com,all,,none,,,Static HTML. Excel: Current Realized
+https://warsawequity.com/portfolio/,Warsaw Equity Group,https://warsawequity.com,current,,js_click,Current,,Polish PE
+https://warsawequity.com/portfolio/,Warsaw Equity Group,https://warsawequity.com,exited,,js_click,Exited,,Polish PE
+https://www.saltcreekcap.com/companies,Salt Creek Capital,https://www.saltcreekcap.com,current,,js_click,Current,,Excel: Current Realized
+https://www.saltcreekcap.com/companies,Salt Creek Capital,https://www.saltcreekcap.com,exited,,js_click,Realized,,Excel: Current Realized
+https://yukonpartners.com/portfolio/,Yukon Partners,https://yukonpartners.com,current,,js_click,Current,,Excel: Filter Current/Realized
+https://yukonpartners.com/portfolio/,Yukon Partners,https://yukonpartners.com,exited,,js_click,Realized,,Excel: Filter Current/Realized
+https://www.edisonpartners.com/portfolio,Edison Partners,https://www.edisonpartners.com,current,venture,js_click,Active,,Excel: Active/Exited
+https://www.edisonpartners.com/portfolio,Edison Partners,https://www.edisonpartners.com,exited,venture,js_click,Exited,,Excel: Active/Exited
+https://www.liberta-partners.com/en/portfolio/,Liberta Partners,https://www.liberta-partners.com,current,,none,,,German PE
+https://www.unigrains.com/en/strategy,Unigrains,https://www.unigrains.com,current,,none,,,Agri PE - strategy page
+https://naxicap.com/en/portfolio/buyout-investment/,Naxicap Buyout,https://naxicap.com,current,buyout,js_click,Current,Buyout,Separate URL per strategy
+https://naxicap.com/en/portfolio/buyout-investment/,Naxicap Buyout,https://naxicap.com,exited,buyout,js_click,Exited,Buyout,
+https://naxicap.com/en/portfolio/smallcap-participations-investissement/,Naxicap Smallcap,https://naxicap.com,current,smallcap,js_click,Current,Smallcap,Separate URL per strategy
+https://naxicap.com/en/portfolio/smallcap-participations-investissement/,Naxicap Smallcap,https://naxicap.com,exited,smallcap,js_click,Exited,Smallcap,
+https://www.riversidecompany.com/investment-portfolio/,Riverside Company,https://www.riversidecompany.com,all,,none,,,Static HTML. Status Strategy Business Unit visible per company. Excel: Filter on business units
+https://vintage-ip.com/portfolio/,Vintage IP,https://vintage-ip.com,all,buyout,js_click,,Fund Investments,Excel: Filter fund/direct investments
+https://vintage-ip.com/portfolio/,Vintage IP,https://vintage-ip.com,all,growth,js_click,,Direct Investments,Excel: Filter fund/direct investments
+https://vikingglobal.com/private-equity-portfolio/,Viking Global,https://vikingglobal.com,current,,js_click,Active,,Excel: Status Active/Historical
+https://vikingglobal.com/private-equity-portfolio/,Viking Global,https://vikingglobal.com,exited,,js_click,Historical,,Excel: Status Active/Historical
+https://frontline.vc/companies/?e-filter-4a7b095-fund=frontline-seed,Frontline VC,https://frontline.vc,current,venture,url_param,,,Excel: Seed/Growth. URL param fund=frontline-seed
+https://frontline.vc/companies/?e-filter-4a7b095-fund=frontline-growth,Frontline VC,https://frontline.vc,current,growth,url_param,,,URL param fund=frontline-growth
+https://www.tpg.com/portfolio/,TPG,https://www.tpg.com,current,,js_click,Current,,Excel: Filter on Platform. Large PE firm
+https://www.tpg.com/portfolio/,TPG,https://www.tpg.com,exited,,js_click,Former,,Excel: Filter on Platform
+https://www.mobeus.co.uk/investments/,Mobeus,https://www.mobeus.co.uk,current,,js_click,Current,,Excel: Current/Realized
+https://www.mobeus.co.uk/investments/,Mobeus,https://www.mobeus.co.uk,exited,,js_click,Realized,,Excel: Current/Realized
+https://www.torquest.com/investments,Torquest,https://www.torquest.com,current,,none,,,Canadian PE
+https://innovacap.com/our-investments/portfolio/,Innovacap,https://innovacap.com,current,,js_click,Current,,Excel: Current/Realized
+https://innovacap.com/our-investments/portfolio/,Innovacap,https://innovacap.com,exited,,js_click,Realized,,Excel: Current/Realized
+https://www.graphitecapital.com/portfolio/,Graphite Capital,https://www.graphitecapital.com,current,,none,,,UK mid-market PE
+https://www.luminegroup.com/our-companies/,Lumine Group,https://www.luminegroup.com,current,,none,,,Vertical software. All current
+https://arlingtoncap.com/investments/,Arlington Capital,https://arlingtoncap.com,current,,js_click,Current,,Excel: Current/Realized
+https://arlingtoncap.com/investments/,Arlington Capital,https://arlingtoncap.com,exited,,js_click,Realized,,Excel: Current/Realized
+https://www.bairdcapital.com/portfolio/,Baird Capital,https://www.bairdcapital.com,current,buyout,js_click,,Global Private Equity,Excel: Investment team Global PE/VC
+https://www.bairdcapital.com/portfolio/,Baird Capital,https://www.bairdcapital.com,current,venture,js_click,,Venture Capital,Excel: Investment team Global PE/VC
+https://www.bbh.com/us/en/what-we-do/capital-partners/private-equity/who-we-work-with/portfolio-companies.html,BBH Capital Partners,https://www.bbh.com,current,,js_click,Current,,Excel: BBHCP Private Equity/CP Opportunities
+https://www.bbh.com/us/en/what-we-do/capital-partners/private-equity/who-we-work-with/portfolio-companies.html,BBH Capital Partners,https://www.bbh.com,exited,,js_click,Exited,,Excel: BBHCP Private Equity/CP Opportunities
+https://berkshirepartners.com/private-equity/portfolio/,Berkshire Partners,https://berkshirepartners.com,current,,js_click,Current,,Excel: Current/Former
+https://berkshirepartners.com/private-equity/portfolio/,Berkshire Partners,https://berkshirepartners.com,exited,,js_click,Former,,Excel: Current/Former
+https://bluemarpartners.com/portfolio/,Bluemar Partners,https://bluemarpartners.com,current,,js_click,Unrealized,,Excel: Realized/Unrealized
+https://bluemarpartners.com/portfolio/,Bluemar Partners,https://bluemarpartners.com,exited,,js_click,Realized,,Excel: Realized/Unrealized
+http://www.blumcapital.com/portfolio,Blum Capital,http://www.blumcapital.com,current,,none,,,$10M+ investments
+https://boathousecapital.com/portfolio/,Boathouse Capital,https://boathousecapital.com,current,,js_click,Active,,Excel: Realized/Active
+https://boathousecapital.com/portfolio/,Boathouse Capital,https://boathousecapital.com,exited,,js_click,Realized,,Excel: Realized/Active
+https://www.bpea-pe.com/portfolio/,BPEA PE,https://www.bpea-pe.com,current,,js_click,Current,,Excel: Current/Realized. Asia PE
+https://www.bpea-pe.com/portfolio/,BPEA PE,https://www.bpea-pe.com,exited,,js_click,Realized,,Excel: Current/Realized. Asia PE
+https://brooksidecp.com/portfolio/,Brookside Capital Partners,https://brooksidecp.com,current,,js_click,Current,,Excel: Current/Exited
+https://brooksidecp.com/portfolio/,Brookside Capital Partners,https://brooksidecp.com,exited,,js_click,Exited,,Excel: Current/Exited
+https://vistria.com/portfolio/,The Vistria Group,https://vistria.com,current,,none,,,Flagship strategy
+https://www.pinecap.com/portfolio,Pine Street Capital,https://www.pinecap.com,current,,js_click,Current,,Excel: Current/Realized
+https://www.pinecap.com/portfolio,Pine Street Capital,https://www.pinecap.com,exited,,js_click,Realized,,Excel: Current/Realized
+https://www.shorehillcapital.com/portfolio/,Shore Hill Capital,https://www.shorehillcapital.com,current,,none,,,
+https://www.blgcapital.com/investments,BLG Capital,https://www.blgcapital.com,current,,none,,,
+https://www.brooksideprivateequity.com/investments.html,Brookside PE,https://www.brooksideprivateequity.com,current,,none,,,
+https://capfunds.com/portfolio/,Cap Funds,https://capfunds.com,current,,none,,,
+https://cfb.com/portfolio/,CFB,https://cfb.com,current,,none,,,
+https://www.cerea.com/en/investissements/portoflio,CEREA Partners,https://www.cerea.com,current,,none,,,French agri PE
+https://www.champlaincanada.com/portfolio/,Champlain Canada,https://www.champlaincanada.com,current,,none,,,
+https://cidcap.com/portfolio/,CID Capital,https://cidcap.com,current,,none,,,
+https://www.cinven.com/portfolio/,Cinven,https://www.cinven.com,current,,js_click,Current,,Large-cap European PE
+https://www.cinven.com/portfolio/,Cinven,https://www.cinven.com,exited,,js_click,Exited,,Large-cap European PE
+https://www.cipiopartners.com/portfolio.html,CIPIO Partners,https://www.cipiopartners.com,current,,none,,,VC secondary
+https://www.clairvest.com/portfolio/,Clairvest,https://www.clairvest.com,current,,js_click,Current,,Canadian PE
+https://www.clairvest.com/portfolio/,Clairvest,https://www.clairvest.com,exited,,js_click,Exited,,Canadian PE
+https://www.insightpartners.com/portfolio/,Insight Partners,https://www.insightpartners.com,current,venture,js_click,Current,,Growth/PE software investor
+https://www.insightpartners.com/portfolio/,Insight Partners,https://www.insightpartners.com,exited,venture,js_click,Exited,,Growth/PE software investor
+https://www.newmountaincapital.com/our-strategies/private-equity/portfolio/,New Mountain Capital,https://www.newmountaincapital.com,current,,js_click,Current Private Equity,,Filter tabs: Current PE / Fully Realized
+https://www.newmountaincapital.com/our-strategies/private-equity/portfolio/,New Mountain Capital,https://www.newmountaincapital.com,exited,,js_click,Fully Realized,,Filter tabs: Current PE / Fully Realized
+https://mcp-capital.co.jp/en/invest/,MCP Capital,https://mcp-capital.co.jp,current,,none,,,Japanese PE
+https://mideuropa.com/portfolio/,Mid Europa,https://mideuropa.com,current,,js_click,Active,,CEE PE
+https://mideuropa.com/portfolio/,Mid Europa,https://mideuropa.com,exited,,js_click,Exited,,CEE PE
+https://www.midoceanpartners.com/our-business/portfolio-companies,MidOcean Partners,https://www.midoceanpartners.com,current,,js_click,Current,,
+https://www.midoceanpartners.com/our-business/portfolio-companies,MidOcean Partners,https://www.midoceanpartners.com,exited,,js_click,Exited,,
+https://www.aegiscapitaladvisors.com/portfolio,Aegis Capital Advisors,https://www.aegiscapitaladvisors.com,current,,none,,,
+https://mountaingate.com/investments/,Mountain Gate,https://mountaingate.com,current,,none,,,
+https://www.multiplesequity.com/partnerships.html,Multiples Equity,https://www.multiplesequity.com,current,,none,,,India PE
+https://www.nazca.es/en/portfolio-2/,NAZCA,https://www.nazca.es,current,,none,,,Spanish PE
+https://newport-im.com/newport-portfolio/,Newport IM,https://newport-im.com,current,,none,,,
+https://www.nordiccapital.com/portfolio-cases/?,Nordic Capital,https://www.nordiccapital.com,current,,js_click,Current,,Shows current or former portfolio companies
+https://www.nordiccapital.com/portfolio-cases/?,Nordic Capital,https://www.nordiccapital.com,exited,,js_click,Former,,Shows current or former portfolio companies
+https://www.norvestor.com/funds/fund-ix,Norvestor,https://www.norvestor.com,current,,none,,,Specific fund page
+https://oasiscapitalghana.com/v2/ebankese-2/,Oasis Capital Ghana,https://oasiscapitalghana.com,current,,none,,,African PE
+https://www.omersprivateequity.com/investments/,OMERS PE,https://www.omersprivateequity.com,current,,js_click,Current,,Canadian pension PE
+https://www.omersprivateequity.com/investments/,OMERS PE,https://www.omersprivateequity.com,exited,,js_click,Exited,,Canadian pension PE
+https://www.orbimed.com/portfolio/,OrbiMed,https://www.orbimed.com,current,venture,js_click,Current,,Healthcare VC/PE
+https://www.orbimed.com/portfolio/,OrbiMed,https://www.orbimed.com,exited,venture,js_click,Exited,,Healthcare VC/PE
+https://orkilacapital.com/portfolio/,Orkila Capital,https://orkilacapital.com,current,,none,,,
+https://pcrp.com/portfolio-companies/,PCRP,https://pcrp.com,current,,none,,,
+https://www.pamplonafunds.com/private-equity/,Pamplona Funds,https://www.pamplonafunds.com,current,,js_click,Current,,
+https://www.pamplonafunds.com/private-equity/,Pamplona Funds,https://www.pamplonafunds.com,exited,,js_click,Exited,,
+https://www.peninsulacapital.co.uk/portfolio,Peninsula Capital UK,https://www.peninsulacapital.co.uk,current,,none,,,UK mid-market
+https://www.petersonpartners.com/portfolio/,Peterson Partners,https://www.petersonpartners.com,current,,none,,,
+https://pfingsten.com/portfolio/,Pfingsten,https://pfingsten.com,current,,none,,,Lower mid-market PE
+https://www.pfm.ca/investments,PFM Capital,https://www.pfm.ca,current,,none,,,Canadian PE
+https://plexuscap.com/portfolio/,Plexus Capital,https://plexuscap.com,current,,none,,,
+https://www.portraitcap.com/portfolio,Portrait Capital,https://www.portraitcap.com,current,,js_click,Current,,
+https://www.portraitcap.com/portfolio,Portrait Capital,https://www.portraitcap.com,exited,,js_click,Exited,,
+https://praesidian.com/selected-transactions/,Praesidian Capital,https://praesidian.com,exited,,none,,,Selected transactions page (mostly exits)
+https://www.psgequity.com/portfolio,PSG Equity,https://www.psgequity.com,current,growth,js_click,Current,,Software growth equity
+https://www.psgequity.com/portfolio,PSG Equity,https://www.psgequity.com,exited,growth,js_click,Exited,,Software growth equity
+https://www.quadrantpe.com.au/funds-investments,Quadrant PE,https://www.quadrantpe.com.au,current,,none,,,Australian PE
+https://www.regentlp.com/portfolio,Regent LP,https://www.regentlp.com,current,,none,,,
+https://www.sagard.com/portfolio/,Sagard,https://www.sagard.com,current,,js_click,Active,,
+https://www.sagard.com/portfolio/,Sagard,https://www.sagard.com,exited,,js_click,Realized,,
+https://www.salemip.com/,Salem IP,https://www.salemip.com,current,,none,,,IP-focused
+https://scaleupcapital.com/portfolio/,Scaleup Capital,https://scaleupcapital.com,current,venture,none,,,
+https://www.siparex.com/en/investments/,Siparex,https://www.siparex.com,current,,js_click,En cours,,French PE
+https://www.siparex.com/en/investments/,Siparex,https://www.siparex.com,exited,,js_click,Cédé,,French PE
+https://www.sofinagroup.com/investments/our-three-investment-styles/long-term-minority-investments/,Sofina,https://www.sofinagroup.com,current,,none,,,Long-term minority investments style
+https://www.source-cap.com/portfolio,Source Capital,https://www.source-cap.com,current,,none,,,
+https://www.souterinvestments.com/portfolio/,Souter Investments,https://www.souterinvestments.com,current,,none,,,
+https://www.sterlinglp.com/companies,Sterling Capital Partners,https://www.sterlinglp.com,current,,none,,,
+http://www.strait-capital.com/en/investments.php,Strait Capital,http://www.strait-capital.com,current,,none,,,
+https://www.summitequity.com/pages/portfolio/portfolio-SEG.html,Summit Equity Group,https://www.summitequity.com,current,,none,,,
+https://www.summitpartners.com/portfolio,Summit Partners,https://www.summitpartners.com,current,growth,js_click,Active,,Growth equity
+https://www.summitpartners.com/portfolio,Summit Partners,https://www.summitpartners.com,exited,growth,js_click,Exited,,Growth equity
+https://www.sgep.com/company,SGEP,https://www.sgep.com,current,,none,,,
+https://www.tcv.com/partnerships,TCV,https://www.tcv.com,current,growth,none,,,Growth/late-stage VC
+https://www.tecum.com/portfolio-overview/,Tecum Capital,https://www.tecum.com,current,,none,,,
+https://tgpinvestments.com/portfolio/,TGP Investments,https://tgpinvestments.com,current,,none,,,
+https://www.tgvestcapital.com/portfolio,TGVest Capital,https://www.tgvestcapital.com,current,,none,,,
+https://cambriagroup.com/portfolio,Cambria Group,https://cambriagroup.com,current,,none,,,
+https://thl.com/portfolio/all-investment-list/,THL,https://thl.com,all,,none,,,Full list at /all-investment-list/. Current portfolio at /portfolio/
+https://www.thomabravo.com/companies,Thoma Bravo,https://www.thomabravo.com,current,,js_click,Current,,Software PE
+https://www.thomabravo.com/companies,Thoma Bravo,https://www.thomabravo.com,exited,,js_click,Former,,Software PE
+https://www.tincinvest.com/en-gb/portfolio/,Tincin Invest,https://www.tincinvest.com,current,,none,,,
+https://www.tinicum.com/OurBusinesses.html,Tinicum,https://www.tinicum.com,current,,none,,,
+https://ttcp.com/portfolio/,TTCP,https://ttcp.com,current,,none,,,
+https://www.torreal.com/key-portfolio-companies/,Torreal,https://www.torreal.com,current,,none,,,Key portfolio (current)
+https://www.torreal.com/historical-portfolio/,Torreal,https://www.torreal.com,exited,,none,,,Historical/exited portfolio
+https://truarcpartners.com/portfolio,Truarc Partners,https://truarcpartners.com,current,,js_click,Current,,
+https://truarcpartners.com/portfolio,Truarc Partners,https://truarcpartners.com,exited,,js_click,Exited,,
+https://truewestcp.com/portfolio-companies/,TrueWest Capital Partners,https://truewestcp.com,current,,none,,,
+https://www.uiag.at/beteiligungen/track-record/,UIAG,https://www.uiag.at,exited,,none,,,Track record page = exits
+https://www.viewsidecapital.com/portfolio,Viewside Capital,https://www.viewsidecapital.com,current,,none,,,
+https://www.vigpartners.com/m/portfolio.html,VIG Partners,https://www.vigpartners.com,current,,none,,,Korean PE
+https://www.vmgpartners.com/companies,VMG Partners,https://www.vmgpartners.com,current,,none,,,Consumer/brand PE
+https://washingtonharbour.com/investments/,Washington Harbour,https://washingtonharbour.com,current,,none,,,
+https://gmbcapitalpartners.com/portfolio/,GMB Capital,https://gmbcapitalpartners.com,current,,js_click,Current,,Excel: Current/Realized
+https://gmbcapitalpartners.com/portfolio/,GMB Capital,https://gmbcapitalpartners.com,exited,,js_click,Realized,,Excel: Current/Realized
+https://www.leeequity.com/portfolio,Lee Equity Partners,https://www.leeequity.com,current,,none,,,
+https://firmament.com/portfolio/,Firmament,https://firmament.com,current,credit,none,,,Credit/private debt
+https://interapartners.com/investments/,Intera Partners,https://interapartners.com,current,,none,,,Finnish PE
+https://geodesiccap.com/portfolio/,Geodesic Capital,https://geodesiccap.com,current,growth,none,,,Growth VC
+https://www.peninsulafunds.com/portfolio/,Peninsula Funds,https://www.peninsulafunds.com,current,,none,,,
+https://polaris-cg.com/us/portfolio/,Polaris Capital Group,https://polaris-cg.com,current,,none,,,
+https://westbridge.co.uk/portfolio/,Westbridge UK,https://westbridge.co.uk,current,,none,,,UK lower mid-market
+https://www.yellowwoodpartners.com/brands,Yellowwood Partners,https://www.yellowwoodpartners.com,current,,none,,,Consumer brand PE
+https://westbridgecap.com/portfolio,Westbridge Capital,https://westbridgecap.com,current,,none,,,India PE
+https://www.outcomescollective.com/portfolio,Outcomes Collective,https://www.outcomescollective.com,current,,none,,,
+https://capitalpartenaires.societegenerale.com/fr/portefeuille/,Capital Partenaires SG,https://capitalpartenaires.societegenerale.com,current,,none,,,French PE
+https://wildbasininv.com/investments,Wild Basin,https://wildbasininv.com,current,,none,,,
+https://wic-capital.net/en/portefeuille/,WIC Capital,https://wic-capital.net,current,,none,,,
+https://indus.eu/about-us/#company-portfolio,Indus PE,https://indus.eu,current,,none,,,German buy-and-hold
+https://www.ixope.fr/portefeuille/,Ixope,https://www.ixope.fr,current,,none,,,French PE
+https://www.westcoastcapital.com/portfolio-2/,West Coast Capital,https://www.westcoastcapital.com,exited,,none,,,Excel: Only exit
+https://www.406ventures.com/portfolio,406 Ventures,https://www.406ventures.com,current,venture,none,,,VC
+https://www.3lcap.com/companies/,3L Capital,https://www.3lcap.com,current,,none,,,
+https://capitalg.com/portfolio/,CapitalG,https://capitalg.com,current,growth,js_click,Active,,Excel: Filter IPO and Acquired separate. Google growth fund
+https://capitalg.com/portfolio/,CapitalG,https://capitalg.com,exited,growth,js_click,IPO,,Excel: Filter IPO and Acquired separate
+https://capitalg.com/portfolio/,CapitalG,https://capitalg.com,exited,growth,js_click,Acquired,,Excel: Filter IPO and Acquired separate
+https://www.coatue.com/portfolio,Coatue,https://www.coatue.com,current,,none,,,Tech-focused VC/hedge
+https://www.globalfounderscapital.com/companies,Global Founders Capital,https://www.globalfounderscapital.com,current,venture,none,,,
+https://www.indexventures.com/companies/,Index Ventures,https://www.indexventures.com,current,venture,none,,,Excel: Filter out ones with second smaller font (acquired/IPOd)
+https://www.ivp.com/portfolio/,IVP,https://www.ivp.com,current,venture,js_click,Current,,Excel: Please filter status
+https://www.ivp.com/portfolio/,IVP,https://www.ivp.com,exited,venture,js_click,Exited,,Excel: Please filter status
+https://lsvp.com/companies/,LSVP,https://lsvp.com,current,venture,none,,,Lightspeed Venture Partners

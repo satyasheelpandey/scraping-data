@@ -6,6 +6,7 @@ from scraper import crawl_portfolio_page
 from llm_extractor import extract_company_seeds
 from google_company_search import find_official_company_website
 from deal_article_finder import find_deal_articles
+from article_analyzer import analyze_deal
 from db import insert_portfolio_row
 
 logger = logging.getLogger(__name__)
@@ -36,13 +37,21 @@ def _is_portfolio_domain(company_url: str, portfolio_url: str) -> bool:
 def process_portfolio_url(
     source_url: str,
     investor_name: str,
-    investor_website: str,
+    investor_link: str,
+    company_status: str = "",
+    strategy: str = "",
+    js_status_filter: str = "",
+    js_strategy_filter: str = "",
     csv_writer=None,
 ) -> bool:
     try:
         print(f"\n Processing portfolio URL: {source_url}")
 
-        _, anchors, blocks, dom_chunks, embedded_json = crawl_portfolio_page(source_url)
+        _, anchors, blocks, dom_chunks, embedded_json = crawl_portfolio_page(
+            source_url,
+            js_status_filter=js_status_filter,
+            js_strategy_filter=js_strategy_filter,
+        )
 
         seeds = extract_company_seeds(
             source_url=source_url,
@@ -87,16 +96,38 @@ def process_portfolio_url(
             except Exception as e:
                 print(f"   [DEAL LINK ERROR] {seed.company_name}: {e}")
 
+            # --- deal article analysis ---
+            deal_info = None
+            try:
+                if any(articles):
+                    deal_info = analyze_deal(
+                        article_urls=articles,
+                        company_name=seed.company_name,
+                        investor_name=investor_name,
+                    )
+            except Exception as e:
+                print(f"   [DEAL ANALYSIS ERROR] {seed.company_name}: {e}")
+
             # --- build final record ---
             record = {
-                "source_url": source_url,
-                "investor_name": investor_name,
-                "investor_website": investor_website,
-                "company_name": seed.company_name,
-                "company_website": seed.company_website,
+                "url": source_url,
+                "investor": investor_name,
+                "investor_link": investor_link,
+                "company": seed.company_name,
+                "company_url": seed.company_website,
+                "company_status": company_status,
+                "strategy": strategy,
                 "article_1": articles[0],
                 "article_2": articles[1],
                 "article_3": articles[2],
+                "announcement_date": deal_info.announcement_date if deal_info else "",
+                "deal_type": deal_info.deal_type if deal_info else "",
+                "deal_value": deal_info.deal_value if deal_info else "",
+                "deal_value_text": deal_info.deal_value_text if deal_info else "",
+                "currency": deal_info.currency if deal_info else "",
+                "deal_stage": deal_info.deal_stage if deal_info else "",
+                "strategic_rationale": deal_info.strategic_rationale if deal_info else "",
+                "source_article_url": deal_info.source_article_url if deal_info else "",
             }
 
             insert_portfolio_row(record)
@@ -104,7 +135,7 @@ def process_portfolio_url(
             if csv_writer:
                 csv_writer.writerow(record)
 
-            print(f"   Saved: {record['company_name']} | articles: {sum(1 for a in articles if a)}")
+            print(f"   Saved: {record['company']} | articles: {sum(1 for a in articles if a)}")
 
         print(f"   Done portfolio: {source_url}")
         return True

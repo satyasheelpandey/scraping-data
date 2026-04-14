@@ -1,6 +1,7 @@
 # scraper.py
 import asyncio
 import json
+import logging
 from typing import List, Tuple, Dict, Any
 
 import requests
@@ -8,6 +9,7 @@ from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 
+logger = logging.getLogger(__name__)
 
 CRAWL_CONFIG = CrawlerRunConfig(
     wait_until="networkidle",
@@ -15,6 +17,44 @@ CRAWL_CONFIG = CrawlerRunConfig(
     scan_full_page=True,
     page_timeout=30000,
 )
+
+# Selectors that commonly represent clickable filter elements on portfolio pages
+_JS_CLICK_SELECTORS = (
+    'a, button, [role="tab"], li, span, div[class*="filter"], label, '
+    'div[class*="tab"], div[class*="btn"], input[type="radio"]'
+)
+
+
+def _build_js_click_code(filter_text: str) -> str:
+    """Build JS snippet that clicks the first element matching *filter_text*."""
+    safe_text = filter_text.replace("\\", "\\\\").replace("'", "\\'")
+    return (
+        "(function() {"
+        f"  const targets = document.querySelectorAll('{_JS_CLICK_SELECTORS}');"
+        "  for (const el of targets) {"
+        "    const t = el.textContent.trim();"
+        f"    if (t === '{safe_text}' || t.startsWith('{safe_text}')) {{"
+        "      el.click();"
+        "      break;"
+        "    }"
+        "  }"
+        "})();"
+    )
+
+
+def _build_js_code(
+    js_status_filter: str,
+    js_strategy_filter: str,
+) -> str:
+    """Combine click snippets for strategy (first) and status filters."""
+    parts: list[str] = []
+    if js_strategy_filter:
+        parts.append(_build_js_click_code(js_strategy_filter))
+        # Small delay between clicks so the DOM can update
+        parts.append("await new Promise(r => setTimeout(r, 1500));")
+    if js_status_filter:
+        parts.append(_build_js_click_code(js_status_filter))
+    return "\n".join(parts)
 
 
 def _try_spa_data_endpoints(url: str) -> List[Dict[str, Any]]:
@@ -83,21 +123,50 @@ def _extract_from_html(base_url: str, html: str, markdown: str):
     return page_text, anchors, blocks, dom_chunks, embedded_json
 
 
-async def _crawl(url: str) -> List[Tuple[str, str]]:
+async def _crawl(
+    url: str,
+    js_status_filter: str = "",
+    js_strategy_filter: str = "",
+) -> List[Tuple[str, str]]:
     """Crawl a URL with JS rendering and return (html, markdown) snapshots."""
+    needs_js = bool(js_status_filter or js_strategy_filter)
+
+    if needs_js:
+        js_code = _build_js_code(js_status_filter, js_strategy_filter)
+        config = CrawlerRunConfig(
+            wait_until="networkidle",
+            delay_before_return_html=5.0,
+            scan_full_page=True,
+            page_timeout=45000,
+            js_code=js_code,
+        )
+        logger.info(
+            "JS click crawl: status=%r, strategy=%r",
+            js_status_filter,
+            js_strategy_filter,
+        )
+    else:
+        config = CRAWL_CONFIG
+
     snapshots: List[Tuple[str, str]] = []
     async with AsyncWebCrawler() as crawler:
         try:
-            res = await crawler.arun(url=url, config=CRAWL_CONFIG)
+            res = await crawler.arun(url=url, config=config)
             snapshots.append((res.html or "", res.markdown or ""))
         except (TimeoutError, RuntimeError, OSError) as e:
             print(f"[SCRAPER] Crawl failed: {e}")
     return snapshots
 
 
-def crawl_portfolio_page(url: str):
+def crawl_portfolio_page(
+    url: str,
+    js_status_filter: str = "",
+    js_strategy_filter: str = "",
+):
     try:
-        snapshots = asyncio.run(_crawl(url))
+        snapshots = asyncio.run(
+            _crawl(url, js_status_filter, js_strategy_filter)
+        )
     except Exception as e:
         print(f"[SCRAPER ERROR] {url}: {e}")
         return "", [], [], [], []
